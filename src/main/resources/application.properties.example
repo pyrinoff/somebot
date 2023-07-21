@@ -1,0 +1,13 @@
+tg.token=111222333:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+tg.botname=Somebot
+database.url=jdbc:mysql://mysql:10101/somedatabase?createDatabaseIfNotExist=true&useSSL=false&useUnicode=true&serverTimezone=Europe/Moscow&characterEncoding=utf-8
+database.username=root
+database.password=password
+database.driver=com.mysql.jdbc.Driver
+database.dialect=org.hibernate.dialect.MySQL8Dialect
+database.hbm2ddl_auto=create
+database.show_sql=true
+database.format_sql=true
+database.cache.use_second_level_cache=false
+database.cache.use_query_cache=false
+database.cache.use_minimal_puts=false
