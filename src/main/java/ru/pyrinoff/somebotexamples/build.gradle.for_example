@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+    id 'java-library-distribution' //pack to build/distributions/name.zip
+    id 'application'
+    id 'org.springframework.boot' version '3.1.1'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+//run task?
+application {
+    mainClassName = 'org.example.Main'
+}
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": 'org.example.Main' //https://www.baeldung.com/gradle-run-java-main
+        )
+    }
+}
+
+dependencies {
+    implementation files('libs/somebot-1.0-SNAPSHOT/somebot-1.0-SNAPSHOT-plain.jar')
+    implementation fileTree(dir: 'libs/somebot-1.0-SNAPSHOT/lib', include: ['*.jar'])
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    testImplementation(
+            'org.slf4j:slf4j-simple:2.0.5',
+            'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+//Avoid duplication of JAR-library
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+tasks.withType(Tar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+tasks.withType(Zip).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+//Get local library .zip and unpack it before build
+task prepareDependency {
+    doLast {
+//        delete 'libs/*'
+        delete fileTree(dir: 'libs').exclude { it.file.isDirectory() }
+        copy {
+            from 'd:/somebot/build/distributions/somebot-1.0-SNAPSHOT.zip'
+            into 'libs'
+        }
+        // Unzip the copied archive
+        ant.unzip(src: 'libs/somebot-1.0-SNAPSHOT.zip', dest: 'libs')
+        delete 'libs/somebot-1.0-SNAPSHOT.zip'
+    }
+}
+compileJava.dependsOn(prepareDependency)
