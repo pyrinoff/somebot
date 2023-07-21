@@ -1,4 +1,4 @@
-package ru.pyrinoff.somebot.model;
+package ru.pyrinoff.somebotexamples.example.model;
 
 
 import jakarta.persistence.*;
@@ -6,14 +6,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
-@MappedSuperclass
+//@MappedSuperclass
+@Entity
 @Table(name = "users", schema = "public")
 @Accessors(chain = true)
-public abstract class AbstractUser {
+public class User {
 
     private static final long serialVersionUID = 1;
 
@@ -31,14 +33,15 @@ public abstract class AbstractUser {
     protected Boolean locked = false;
 
     @Column
-    protected int stage = 0;
+    protected int stage = STAGE_NONE;
+
+    private LocalDate birthDate;
 
     @Column
-    @Nullable
     @Lob
     protected byte[] customData = null;
 
-    private static final int STAGE_NONE = 0;
+    public static final int STAGE_NONE = 0;
 
     @Override
     public String toString() {

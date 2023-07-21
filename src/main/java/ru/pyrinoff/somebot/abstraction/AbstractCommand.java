@@ -1,6 +1,5 @@
 package ru.pyrinoff.somebot.abstraction;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -11,14 +10,12 @@ import ru.pyrinoff.somebot.api.command.ICommand;
 import ru.pyrinoff.somebot.api.condition.ICondition;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
 import ru.pyrinoff.somebot.command.condition.Ruleset;
-import ru.pyrinoff.somebot.model.Message;
-import ru.pyrinoff.somebot.model.User;
 import ru.pyrinoff.somebot.service.bot.TelegramBot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public abstract class AbstractCommand implements ICommand {
+public abstract class AbstractCommand<M extends AbstractMessage> implements ICommand<M> {
 
     public static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
@@ -42,7 +39,7 @@ public abstract class AbstractCommand implements ICommand {
 
     @Getter
     @Setter
-    private Message message;
+    private M message;
 
     public ArrayList<MultiRuleset> getFireConditions() {
         if(fireConditions == null) {
@@ -65,9 +62,5 @@ public abstract class AbstractCommand implements ICommand {
         return new Ruleset(conditions);
     }
     //SETUP ALIASES END
-
-    protected User getUser() {
-        return message.getUserCast(User.class);
-    }
 
 }

@@ -30,4 +30,6 @@ public interface IDatabaseDataProvider {
 
     @NotNull String getCacheRegionFactoryClass();
 
+    @NotNull String getDatabaseFormatSql();
+
 }

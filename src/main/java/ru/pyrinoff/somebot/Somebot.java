@@ -13,7 +13,15 @@ public class Somebot {
     public Somebot() {
     }
 
-    public Somebot(final String commandPackage) {
+    public static Somebot byClass(final Class<?> clazz) {
+        return new Somebot(clazz.getPackage().getName());
+    }
+
+    public static Somebot byString(final String commandPackage) {
+        return new Somebot(commandPackage);
+    }
+
+    private Somebot(final String commandPackage) {
         this.commandPackage = commandPackage;
         databasePackages = commandPackage;
     }

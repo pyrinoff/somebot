@@ -1,16 +1,15 @@
 package ru.pyrinoff.somebot.command.condition.concrete;
 
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.condition.ICondition;
-import ru.pyrinoff.somebot.model.Message;
 
-public class HasVideoNote implements ICondition {
-
+public class HasVideoNote implements ICondition<AbstractMessage> {
 
     public HasVideoNote() {
     }
 
     @Override
-    public boolean isFired(final Message message) {
+    public boolean isFired(final AbstractMessage message) {
         return message.getOriginalMessage().hasMessage()
                 && message.getOriginalMessage().getMessage().hasVideoNote();
     }

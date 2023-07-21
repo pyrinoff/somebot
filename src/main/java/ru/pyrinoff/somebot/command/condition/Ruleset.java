@@ -2,8 +2,8 @@ package ru.pyrinoff.somebot.command.condition;
 
 
 import ru.pyrinoff.somebot.abstraction.AbstractCommand;
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.condition.ICondition;
-import ru.pyrinoff.somebot.model.Message;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ public class Ruleset implements ICondition {
 
     ArrayList<ICondition> conditions;
 
-    public boolean isFired(Message message) {
+    public boolean isFired(AbstractMessage message) {
         for (ICondition oneCondition : conditions) {
             AbstractCommand.logger.debug("Check condition: " + oneCondition);
             if (!oneCondition.isFired(message)) {

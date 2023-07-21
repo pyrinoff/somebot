@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.command.ICommand;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
-import ru.pyrinoff.somebot.model.Message;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,18 +16,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class CommandPool {
+public class CommandPool<M extends AbstractMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(CommandPool.class);
 
-    private List<ICommand> commandList = Collections.emptyList();
+    private List<ICommand<M>> commandList = Collections.emptyList();
 
-    public CommandPool(@Autowired final ICommand[] commands) {
+    public CommandPool(@Autowired final ICommand<M>[] commands) {
         setCommandList(new ArrayList<>(List.of(commands)));
         logger.info("Initialized with "+ commandList.size()+" commands! " + commandList);
     }
 
-    public CommandPool setCommandList(final List<ICommand> commandList) {
+    public CommandPool<M> setCommandList(final List<ICommand<M>> commandList) {
         this.commandList = commandList;
         prepareCommandList();
         return this;
@@ -38,8 +38,8 @@ public class CommandPool {
         Collections.sort(commandList, Comparator.comparingInt(ICommand::getPriority));
     }
 
-    public CommandPool addSingleCommand(Class<? extends ICommand> commandClass) throws DuplicateMemberException {
-        ICommand command;
+    public CommandPool<M> addSingleCommand(Class<? extends ICommand<M>> commandClass) throws DuplicateMemberException {
+        ICommand<M> command;
         try {
             command = commandClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -52,9 +52,9 @@ public class CommandPool {
         return this;
     }
 
-    public List<ICommand> getFiredCommands(final Message message) {
-        final List<ICommand> commandsFired = new ArrayList<>();
-        for (final ICommand command : commandList) {
+    public List<ICommand<M>> getFiredCommands(final M message) {
+        final List<ICommand<M>> commandsFired = new ArrayList<>();
+        for (final ICommand<M> command : commandList) {
             if (isCommandFired(message, command)) {
                 commandsFired.add(command);
             }
@@ -63,7 +63,7 @@ public class CommandPool {
         return commandsFired;
     }
 
-    public boolean isCommandFired(final Message message, final ICommand command) {
+    public boolean isCommandFired(final M message, final ICommand<M> command) {
         logger.debug("Check fire condition of command: " + command.getClass());
         for (MultiRuleset oneRuleset : command.getFireConditions()) {
             logger.debug("Checking MultiRuleset: " + oneRuleset.getClass().getName());

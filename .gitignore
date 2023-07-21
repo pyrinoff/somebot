@@ -107,7 +107,6 @@ temp/
 .run/
 *.tar.gz
 
-/src/main/java/ru/pyrinoff/example
-/src/main/java/ru/pyrinoff/example2
 /src/main/resources/files
 src/main/resources/application.properties
+/src/main/java/org

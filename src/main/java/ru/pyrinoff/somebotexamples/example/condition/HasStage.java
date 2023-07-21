@@ -1,11 +1,11 @@
-package ru.pyrinoff.somebot.command.condition.concrete;
+package ru.pyrinoff.somebotexamples.example.condition;
 
 import ru.pyrinoff.somebot.api.condition.ICondition;
-import ru.pyrinoff.somebot.model.Message;
+import ru.pyrinoff.somebotexamples.example.model.CustomMessage;
 
 import java.util.Arrays;
 
-public class HasStage implements ICondition {
+public class HasStage implements ICondition<CustomMessage> {
 
     final int[] stages;
 
@@ -14,7 +14,7 @@ public class HasStage implements ICondition {
     }
 
     @Override
-    public boolean isFired(final Message message) {
+    public boolean isFired(final CustomMessage message) {
         return message.hasUser() && Arrays.binarySearch(stages, message.getUser().getStage()) >=0;
     }
 

@@ -1,11 +1,11 @@
 package ru.pyrinoff.somebot.api.command;
 
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
-import ru.pyrinoff.somebot.model.Message;
 
 import java.util.ArrayList;
 
-public interface ICommand {
+public interface ICommand<M extends AbstractMessage> {
 
     ArrayList<MultiRuleset> getFireConditions();
 
@@ -25,11 +25,10 @@ public interface ICommand {
 
     void setProcessNewCircle(boolean processNewCircle);
 
-
     void process();
 
-    Message getMessage();
+    M getMessage();
 
-    void setMessage(Message message);
+    void setMessage(M message);
 
 }

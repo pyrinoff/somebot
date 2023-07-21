@@ -1,9 +1,9 @@
 package ru.pyrinoff.somebot.api.condition;
 
-import ru.pyrinoff.somebot.model.Message;
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 
-public interface ICondition {
+public interface ICondition<M extends AbstractMessage> {
 
-    boolean isFired(final Message message);
+    boolean isFired(final M message);
 
 }

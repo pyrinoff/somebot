@@ -1,9 +1,9 @@
 package ru.pyrinoff.somebot.command.condition.concrete;
 
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.condition.ICondition;
-import ru.pyrinoff.somebot.model.Message;
 
-public class HasAnyText implements ICondition {
+public class HasAnyText implements ICondition<AbstractMessage> {
 
     protected final boolean simple;
 
@@ -12,7 +12,7 @@ public class HasAnyText implements ICondition {
     }
 
     @Override
-    public boolean isFired(final Message message) {
+    public boolean isFired(final AbstractMessage message) {
         return (message.getOriginalMessage().hasMessage() && message.getOriginalMessage().getMessage().hasText()) == simple;
     }
 

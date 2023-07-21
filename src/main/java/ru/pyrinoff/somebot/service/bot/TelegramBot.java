@@ -34,7 +34,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        processingService.process(update);
+        processingService.processUpdate(update);
     }
 
     public void sendMessage(Long chatId, String textToSend, Boolean protect) {
