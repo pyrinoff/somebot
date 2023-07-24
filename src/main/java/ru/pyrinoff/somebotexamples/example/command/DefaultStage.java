@@ -31,7 +31,7 @@ public class DefaultStage extends CustomCommand {
 
     @Override
     public void process() {
-        telegramBot.sendMessageBack(getMessage().getOriginalMessage(), TEXT_SHOW_YOUR_BIRTHDATE + getUser().getBirthDate(), true);
+        getTelegramBot().sendMessageBack(getOriginalMessage(), TEXT_SHOW_YOUR_BIRTHDATE + getUser().getBirthDate(), true);
         getUser().setDefaultStage();
     }
 

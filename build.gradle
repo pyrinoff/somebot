@@ -19,6 +19,11 @@ jar {
     enabled = true
 }
 
+tasks.resolveMainClassName.enabled = false
+tasks.distTar.enabled = false
+//tasks.bootDistTar.enabled = false
+//tasks.bootDistZip.enabled = false
+
 repositories {
     mavenCentral()
 }

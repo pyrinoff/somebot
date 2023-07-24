@@ -23,7 +23,7 @@ public class Memory extends AbstractCommandSimpleMessage {
 
     @Override
     public void process() {
-        telegramBot.sendMessageBack(getMessage().getOriginalMessage(), "Memory usage: " + MemoryUsageUtil.getMemoryUsageMb(), true);
+        getTelegramBot().sendMessageBack(getOriginalMessage(), "Memory usage: " + MemoryUsageUtil.getMemoryUsageMb(), true);
     }
 
 }

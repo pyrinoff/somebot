@@ -31,7 +31,9 @@ public abstract class AbstractMessageProcessingService<M extends AbstractMessage
 
     protected void processMessage(final M message) {
         List<ICommand<M>> firedCommands = commandPool.getFiredCommands(message);
+        logger.debug("Processing command count: " + firedCommands.size() + ", list: " + firedCommands);
         for (final ICommand<M> oneCommand : firedCommands) {
+            logger.debug("Processing command: " + oneCommand.getClass().getName());
             try {
                 oneCommand.setMessage(message);
                 oneCommand.process();

@@ -22,12 +22,12 @@ public class Whois extends AbstractCommandSimpleMessage {
 
     @Override
     public void process() {
-        telegramBot.sendMessageBack(getMessage().getOriginalMessage(),
-                "Your chat id is: " + getMessage().getOriginalMessage().getMessage().getChatId() + "\n"
-                        + "You user id: " + getMessage().getOriginalMessage().getMessage().getFrom().getId() + "\n"
-                        + "Your username: '" + getMessage().getOriginalMessage().getMessage().getFrom().getUserName() + "'\n"
-                        + "Your name: '" + getMessage().getOriginalMessage().getMessage().getFrom().getFirstName() + " "
-                        + getMessage().getOriginalMessage().getMessage().getFrom().getLastName() + "'\n"
+        getTelegramBot().sendMessageBack(getOriginalMessage(),
+                "Your chat id is: " + getOriginalMessage().getMessage().getChatId() + "\n"
+                        + "You user id: " + getOriginalMessage().getMessage().getFrom().getId() + "\n"
+                        + "Your username: '" + getOriginalMessage().getMessage().getFrom().getUserName() + "'\n"
+                        + "Your name: '" + getOriginalMessage().getMessage().getFrom().getFirstName() + " "
+                        + getOriginalMessage().getMessage().getFrom().getLastName() + "'\n"
                 , true
         );
     }

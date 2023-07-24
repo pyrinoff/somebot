@@ -9,10 +9,7 @@ import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.command.ICommand;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -59,7 +56,7 @@ public class CommandPool<M extends AbstractMessage> {
                 commandsFired.add(command);
             }
         }
-        logger.debug("Fired commands count: " + commandsFired.size());
+        logger.debug("Fired commands count: " + commandsFired.size() + ", list: " + commandsFired);
         return commandsFired;
     }
 

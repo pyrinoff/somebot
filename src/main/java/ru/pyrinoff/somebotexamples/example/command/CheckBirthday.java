@@ -44,28 +44,28 @@ public class CheckBirthday extends CustomCommand {
     @Override
     public void process() {
         if(getUser().getStage() == STAGE_BIRTHDAY_1_PLEASE_ENTER) {
-            telegramBot.sendMessageBack(getMessage().getOriginalMessage(), TEXT_ENTER_BIRTHDATE, true);
+            getTelegramBot().sendMessageBack(getOriginalMessage(), TEXT_ENTER_BIRTHDATE, true);
             getUser().setStage(STAGE_BIRTHDAY_2_WAITING_FOR_ENTER);
             return;
         }
         if(getUser().getStage() == STAGE_BIRTHDAY_2_WAITING_FOR_ENTER) {
-            final String textMessage = getMessage().getOriginalMessage().getMessage().getText().trim();
+            final String textMessage = getMessage().getText();
             final LocalDate localDate = DateUtil.getLocalDate(textMessage, PATTERN_BIRTH_DATE);
             if(localDate == null) {
-                telegramBot.sendMessageBack(getMessage().getOriginalMessage(), TEXT_WRONG_ERROR_BIRTHDATE_FORMAT, true);
+                getTelegramBot().sendMessageBack(getOriginalMessage(), TEXT_WRONG_ERROR_BIRTHDATE_FORMAT, true);
                 return;
             }
             getUser().setBirthDate(localDate);
             getUser().setDefaultStage();
             if(!DateUtil.isAgeOver(localDate, YEAR_MIN, true)) {
-                telegramBot.sendMessageBack(getMessage().getOriginalMessage(), TEXT_YOUNG, true);
+                getTelegramBot().sendMessageBack(getOriginalMessage(), TEXT_YOUNG, true);
                 return;
             }
             if(DateUtil.isAgeOver(localDate, YEAR_MAX, false)) {
-                telegramBot.sendMessageBack(getMessage().getOriginalMessage(), TEXT_OLD, true);
+                getTelegramBot().sendMessageBack(getOriginalMessage(), TEXT_OLD, true);
                 return;
             }
-            telegramBot.sendMessageBack(getMessage().getOriginalMessage(), TEXT_OKAY, true);
+            getTelegramBot().sendMessageBack(getOriginalMessage(), TEXT_OKAY, true);
         }
     }
 

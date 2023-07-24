@@ -23,7 +23,7 @@ public class Start extends AbstractCommandSimpleMessage {
 
     @Override
     public void process() {
-        telegramBot.sendMessageBack(getMessage().getOriginalMessage(), "Start message answer", true);
+        getTelegramBot().sendMessageBack(getOriginalMessage(), "Start message answer", true);
     }
 
 }

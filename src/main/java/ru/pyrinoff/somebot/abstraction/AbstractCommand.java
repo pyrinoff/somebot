@@ -2,10 +2,12 @@ package ru.pyrinoff.somebot.abstraction;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.pyrinoff.somebot.api.command.ICommand;
 import ru.pyrinoff.somebot.api.condition.ICondition;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
@@ -19,23 +21,24 @@ public abstract class AbstractCommand<M extends AbstractMessage> implements ICom
 
     public static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
-    protected ArrayList<MultiRuleset> fireConditions;
+    private ArrayList<MultiRuleset> fireConditions;
 
     @Autowired
     @Lazy
-    protected TelegramBot telegramBot;
+    @Getter
+    private TelegramBot telegramBot;
 
     @Getter
     @Setter
-    protected boolean proceedNextCommand = false;
+    private boolean proceedNextCommand = false;
 
     @Getter
     @Setter
-    protected boolean processNewCircle = false;
+    private boolean processNewCircle = false;
 
     @Getter
     @Setter
-    protected boolean commandEnabled = true;
+    private boolean commandEnabled = true;
 
     @Getter
     @Setter
@@ -62,5 +65,13 @@ public abstract class AbstractCommand<M extends AbstractMessage> implements ICom
         return new Ruleset(conditions);
     }
     //SETUP ALIASES END
+
+    public Update getOriginalMessage() {
+        return getMessage().getOriginalMessage();
+    }
+
+    public @Nullable Long getChatId() {
+        return getOriginalMessage().hasMessage() ? getOriginalMessage().getMessage().getChatId() : null;
+    }
 
 }

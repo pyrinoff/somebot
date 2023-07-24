@@ -26,8 +26,8 @@ public class FirstUserMessage extends CustomCommand {
 
     @Override
     public void process() {
-        getMessage().getUser().setStage(CheckBirthday.STAGE_BIRTHDAY_1_PLEASE_ENTER);
-        logger.info("Current stage in message (command): " +  getMessage().getUser().getStage());
+        getUser().setStage(CheckBirthday.STAGE_BIRTHDAY_1_PLEASE_ENTER);
+        logger.info("Current stage in message (command): " +  getUser().getStage());
         getMessage().setFirstMessageFromUser(false);
         setProceedNextCommand(false);
         setProcessNewCircle(true);
