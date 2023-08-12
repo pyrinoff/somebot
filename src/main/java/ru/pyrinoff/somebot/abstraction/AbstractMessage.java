@@ -33,4 +33,8 @@ public abstract class AbstractMessage {
         return getOriginalMessage().getMessage().getChatId();
     }
 
+    public Integer getMessageTimestamp() {
+        return getOriginalMessage().getMessage().getDate();
+    }
+
 }

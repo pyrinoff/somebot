@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.command.ICommand;
+import ru.pyrinoff.somebot.api.service.IAntiFloodService;
 import ru.pyrinoff.somebot.api.service.IMessageProcessingService;
 import ru.pyrinoff.somebot.command.CommandPool;
 
@@ -21,9 +22,16 @@ public abstract class AbstractMessageProcessingService<M extends AbstractMessage
     @Autowired
     protected CommandPool<M> commandPool;
 
+    @Autowired
+    protected IAntiFloodService antiFloodService;
+
     @Override
     public void processUpdate(final Update update) {
         M message = formMessageByUpdate(update);
+        if(antiFloodService.isFloodMessage(message)) {
+            onFloodMessage(message);
+            return;
+        }
         preprocessMessage(message);
         processMessage(message);
         postProcessMessage(message);
@@ -55,5 +63,9 @@ public abstract class AbstractMessageProcessingService<M extends AbstractMessage
     abstract protected void preprocessMessage(final M message) ;
 
     abstract protected void postProcessMessage(M message);
+
+    protected void onFloodMessage(M message) {
+
+    }
 
 }
