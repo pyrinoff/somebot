@@ -1,28 +1,21 @@
 plugins {
     id 'java'
-    id 'java-library-distribution'
     id 'org.springframework.boot' version '3.1.1'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'maven-publish'
 }
 
 group 'ru.pyrinoff'
-version '1.0-SNAPSHOT'
+version '0.1'
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
-bootJar {
-    enabled = false
-}
-
+bootJar { enabled = false }
+tasks.resolveMainClassName.enabled = false
 jar {
     enabled = true
+    archiveClassifier = ''
 }
-
-tasks.resolveMainClassName.enabled = false
-tasks.distTar.enabled = false
-//tasks.bootDistTar.enabled = false
-//tasks.bootDistZip.enabled = false
 
 repositories {
     mavenCentral()
@@ -31,13 +24,13 @@ repositories {
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
-    implementation (
+    implementation(
             'org.jetbrains:annotations:24.0.1',
             'org.slf4j:slf4j-simple:2.0.5',
             'org.springframework.boot:spring-boot-starter-data-jpa:3.1.0',
             'org.telegram:telegrambots:6.7.0',
     )
-    runtimeOnly (
+    runtimeOnly(
             'mysql:mysql-connector-java:8.0.33'
     )
     testImplementation(
@@ -49,4 +42,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+wrapper {
+    gradleVersion = "7.4"
+    distributionType = Wrapper.DistributionType.ALL
 }

@@ -110,3 +110,5 @@ temp/
 /src/main/resources/files
 src/main/resources/application.properties
 /src/main/java/org
+
+.gitlab-ci.yml
