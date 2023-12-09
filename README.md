@@ -19,7 +19,12 @@ _Проект находится на стадии разработки._
 * HDD: 3Gb+
 
 ## ИСПОЛЬЗОВАНИЕ
-См. https://gitlab.com/somebot/examples
+GitHub: 
+* https://github.com/pyrinoff/somebot-example1
+* https://github.com/pyrinoff/somebot-example2
+
+GitLab:
+* https://gitlab.com/somebot/examples
 
 ## TO-DO:
 1. Реализовать возможность использовать не только Telegram, но и VK (простой работой с абстракцией).
