@@ -107,8 +107,10 @@ temp/
 .run/
 *.tar.gz
 
+##############################
+src/main/java/ru/pyrinoff/examples/*
 /src/main/resources/files
 src/main/resources/application.properties
 /src/main/java/org
-
 .gitlab-ci.yml
+/src/main/java/ru/pyrinoff/examples/

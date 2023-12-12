@@ -1,9 +1,10 @@
-package ru.pyrinoff.somebot.command.condition.concrete;
+/*
+package ru.pyrinoff.somebot.service.bot.tg.condition.concrete;
 
-import ru.pyrinoff.somebot.abstraction.AbstractMessage;
-import ru.pyrinoff.somebot.api.condition.ICondition;
+import ru.pyrinoff.somebot.service.bot.tg.ITgCondition;
+import ru.pyrinoff.somebot.service.bot.tg.TgMessage;
 
-public class HasTextEquals implements ICondition<AbstractMessage> {
+public class HasTextEquals<M extends TgMessage> implements ITgCondition {
 
     final String theText;
 
@@ -12,10 +13,11 @@ public class HasTextEquals implements ICondition<AbstractMessage> {
     }
 
     @Override
-    public boolean isFired(final AbstractMessage message) {
+    public boolean isFired(final TgMessage message) {
         return message.getOriginalMessage().hasMessage()
                 && message.getOriginalMessage().getMessage().hasText()
                 && message.getOriginalMessage().getMessage().getText().equals(theText);
     }
 
 }
+*/

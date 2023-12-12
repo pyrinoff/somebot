@@ -1,12 +1,16 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'org.springframework.boot' version '3.1.1'
     id 'maven-publish'
 }
 
 group 'ru.pyrinoff'
-version '0.1'
+version '0.2.2'
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
@@ -19,19 +23,20 @@ jar {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
     implementation(
             'org.jetbrains:annotations:24.0.1',
             'org.slf4j:slf4j-simple:2.0.5',
             'org.springframework.boot:spring-boot-starter-data-jpa:3.1.0',
             'org.telegram:telegrambots:6.7.0',
-    )
-    runtimeOnly(
-            'mysql:mysql-connector-java:8.0.33'
+            'com.github.pyrinoff:vk-java-sdk:7fdcb839e4', //'com.vk.api:sdk:1.0.14'
+            //'com.google.code.gson:gson:2.9.0',
     )
     testImplementation(
             'org.slf4j:slf4j-simple:2.0.5',
@@ -49,6 +54,14 @@ publishing {
         maven(MavenPublication) {
             from components.java
         }
+
+//        library(MavenPublication) {
+//            setGroupId customGroup
+//        }
+    }
+
+    repositories {
+        mavenLocal()
     }
 }
 
@@ -56,3 +69,5 @@ wrapper {
     gradleVersion = "7.4"
     distributionType = Wrapper.DistributionType.ALL
 }
+
+build.finalizedBy publishToMavenLocal

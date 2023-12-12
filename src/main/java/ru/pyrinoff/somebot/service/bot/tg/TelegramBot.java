@@ -1,10 +1,11 @@
-package ru.pyrinoff.somebot.service.bot;
+package ru.pyrinoff.somebot.service.bot.tg;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
@@ -15,31 +16,33 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.pyrinoff.somebot.api.service.IMessageProcessingService;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import ru.pyrinoff.somebot.abstraction.AbstractBot;
 import ru.pyrinoff.somebot.service.PropertyService;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Component
-public class TelegramBot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
 
     private static final Logger logger = LoggerFactory.getLogger(TelegramBot.class);
 
     @Autowired PropertyService propertyService;
 
-    @Autowired IMessageProcessingService processingService;
+    @Autowired TgMessageProcessingService processingService;
 
     @Override
     public String getBotUsername() {
-        return propertyService.getBotname();
+        return propertyService.getTgBotname();
     }
 
     @Override
     public String getBotToken() {
-        return propertyService.getToken();
+        return propertyService.getTgToken();
     }
 
     @Override
@@ -79,11 +82,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-
     public void copyMessage(Update update, Long chatId, Boolean protect) {
         copyMessage(update.getMessage().getChatId(), update.getMessage().getMessageId(), chatId, protect);
     }
-
 
     public void copyMessage(final Long fromChatId, final Integer fromMessageId, final Long toChatId, Boolean protect) {
         final CopyMessage copyMessage = new CopyMessage();
@@ -156,6 +157,21 @@ public class TelegramBot extends TelegramLongPollingBot {
             logger.error("Cant SendMediaGroup (photos)!");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void initialize() {
+        if(!propertyService.getTgEnabled()) {
+            logger.info("Telegram bot: disabled");
+            return;
+        }
+        try {
+            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            telegramBotsApi.registerBot(this);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+        logger.info("Initialized bot: tg, name: " + getBotUsername());
     }
 
 }

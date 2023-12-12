@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.command.ICommand;
+import ru.pyrinoff.somebot.api.command.ICommandWithTimestampAndChatId;
 import ru.pyrinoff.somebot.api.service.IAntiFloodService;
 import ru.pyrinoff.somebot.api.service.IMessageProcessingService;
 import ru.pyrinoff.somebot.command.CommandPool;
@@ -14,21 +14,24 @@ import ru.pyrinoff.somebot.command.CommandPool;
 import java.util.List;
 
 @Component
-public abstract class AbstractMessageProcessingService<M extends AbstractMessage>
-        implements IMessageProcessingService {
+public abstract class AbstractMessageProcessingService<Z, M extends AbstractMessage<Z>>
+        implements IMessageProcessingService<Z, M> {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractMessageProcessingService.class);
 
     @Autowired
-    protected CommandPool<M> commandPool;
+    protected CommandPool<Z, M> commandPool;
 
     @Autowired
     protected IAntiFloodService antiFloodService;
 
     @Override
-    public void processUpdate(final Update update) {
-        M message = formMessageByUpdate(update);
-        if(antiFloodService.isFloodMessage(message)) {
+    public void processUpdate(final Z update) {
+        messageProcessing(convertUpdateToMessage(update));
+    }
+
+    public void messageProcessing(final M message) {
+        if (antiFloodService.isFloodMessage((ICommandWithTimestampAndChatId) message)) {
             onFloodMessage(message);
             return;
         }
@@ -38,9 +41,9 @@ public abstract class AbstractMessageProcessingService<M extends AbstractMessage
     }
 
     protected void processMessage(final M message) {
-        List<ICommand<M>> firedCommands = commandPool.getFiredCommands(message);
+        List<ICommand<Z, M>> firedCommands = commandPool.getFiredCommands(message);
         logger.debug("Processing command count: " + firedCommands.size() + ", list: " + firedCommands);
-        for (final ICommand<M> oneCommand : firedCommands) {
+        for (final ICommand<Z, M> oneCommand : firedCommands) {
             logger.debug("Processing command: " + oneCommand.getClass().getName());
             try {
                 oneCommand.setMessage(message);
@@ -58,9 +61,9 @@ public abstract class AbstractMessageProcessingService<M extends AbstractMessage
         }
     }
 
-    abstract protected M formMessageByUpdate(final Update update);
+    abstract protected void preprocessMessage(final M message);
 
-    abstract protected void preprocessMessage(final M message) ;
+    abstract protected M convertUpdateToMessage(final Z update);
 
     abstract protected void postProcessMessage(M message);
 

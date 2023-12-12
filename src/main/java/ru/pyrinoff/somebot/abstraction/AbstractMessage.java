@@ -1,40 +1,25 @@
 package ru.pyrinoff.somebot.abstraction;
 
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.pyrinoff.somebot.util.StringUtil;
+import ru.pyrinoff.somebot.api.command.ICommandWithTimestampAndChatId;
 
 @Getter
-public abstract class AbstractMessage {
+public abstract class AbstractMessage<M> implements ICommandWithTimestampAndChatId {
 
-    @NotNull Update originalMessage;
+    private M originalMessage;
 
-    public AbstractMessage(@NotNull Update originalMessage) {
+    public AbstractMessage(M originalMessage) {
         this.originalMessage = originalMessage;
     }
 
-    public String getText() {
-        if(!getOriginalMessage().hasMessage() || getOriginalMessage().getMessage().getText().isEmpty() || getOriginalMessage().getMessage().getText() == null)
-            throw new RuntimeException("Cant get text from this update!");
-        return getOriginalMessage().getMessage().getText();
+    public M getOriginalMessage() {
+        return originalMessage;
     }
 
-    public String getArg(int index) {
-        return StringUtil.getArgString(getText(), index, " ", 1024, false);
-    }
+//    public abstract Long getSenderChatId();
 
-    public Integer getArgInt(int index) {
-        final String arg = getArg(index);
-        return arg == null ? null : Integer.parseInt(arg);
-    }
+//    public abstract Integer getMessageTimestamp();
 
-    public Long getSenderChatId() {
-        return getOriginalMessage().getMessage().getChatId();
-    }
 
-    public Integer getMessageTimestamp() {
-        return getOriginalMessage().getMessage().getDate();
-    }
 
 }

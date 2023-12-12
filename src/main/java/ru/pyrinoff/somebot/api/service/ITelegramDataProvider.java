@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ITelegramDataProvider {
 
-    @NotNull String getToken();
+    @NotNull String getTgToken();
 
-    @NotNull String getBotname();
+    @NotNull String getTgBotname();
 
 }

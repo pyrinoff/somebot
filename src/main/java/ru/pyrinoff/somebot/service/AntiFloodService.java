@@ -1,7 +1,7 @@
 package ru.pyrinoff.somebot.service;
 
 import org.springframework.stereotype.Component;
-import ru.pyrinoff.somebot.abstraction.AbstractMessage;
+import ru.pyrinoff.somebot.api.command.ICommandWithTimestampAndChatId;
 import ru.pyrinoff.somebot.api.service.IAntiFloodService;
 
 import java.util.HashMap;
@@ -26,7 +26,7 @@ public class AntiFloodService implements IAntiFloodService {
     }
 
     @Override
-    public boolean isFloodMessage(AbstractMessage message) {
+    public boolean isFloodMessage(ICommandWithTimestampAndChatId message) {
         final Integer messageTimestamp = message.getMessageTimestamp();
         final Long userId = message.getSenderChatId();
         if (userLastMessageTime.containsKey(userId)) {

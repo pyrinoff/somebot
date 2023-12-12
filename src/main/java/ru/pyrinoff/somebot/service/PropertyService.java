@@ -14,18 +14,46 @@ import ru.pyrinoff.somebot.api.service.ITelegramDataProvider;
 public class PropertyService implements ITelegramDataProvider, IDatabaseDataProvider {
 
     //TG START
+    @NotNull
+    @Value("#{environment['tg.enabled']}")
+    private Boolean tgEnabled;
 
     @NotNull
     @Value("#{environment['tg.token']}")
-    private String token;
+    private String tgToken;
 
     @NotNull
     @Value("#{environment['tg.botname']}")
-    private String botname;
-
+    private String tgBotname;
     //TG END
-    //DATABASE START
 
+    //VK START
+    @NotNull
+    @Value("#{environment['vk.enabled']}")
+    private Boolean vkEnabled;
+
+    @NotNull
+    @Value("#{environment['vk.groupid']}")
+    private Integer vkGroupId;
+
+    @NotNull
+    @Value("#{environment['vk.grouptoken']}")
+    private String vkGroupToken;
+
+    @NotNull
+    @Value("#{environment['vk.admintoken']}")
+    private String vkAdminToken;
+    @NotNull
+
+    @Value("#{environment['vk.adminid']}")
+    private String vkAdminId;
+    @NotNull
+
+    @Value("#{environment['vk.appid']}")
+    private String vkAppId;
+    //VK END
+
+    //DATABASE START
     @NotNull
     @Value("#{environment['database.url']}")
     private String databaseUrl;
@@ -81,7 +109,6 @@ public class PropertyService implements ITelegramDataProvider, IDatabaseDataProv
     @NotNull
     @Value("#{environment['database.cache.region.factory_class']}")
     private String cacheRegionFactoryClass;
-
     //DATABASE END
 
 }

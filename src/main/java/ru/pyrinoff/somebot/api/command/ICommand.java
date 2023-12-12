@@ -5,13 +5,13 @@ import ru.pyrinoff.somebot.command.condition.MultiRuleset;
 
 import java.util.ArrayList;
 
-public interface ICommand<M extends AbstractMessage> {
+public interface ICommand<Z, M extends AbstractMessage<Z>> {
 
-    ArrayList<MultiRuleset> getFireConditions();
+    ArrayList<MultiRuleset<Z, M>> getFireConditions();
 
     int getPriority();
 
-    ArrayList<MultiRuleset> setupFireConditions();
+    ArrayList<MultiRuleset<Z, M>> setupFireConditions();
 
     boolean isProceedNextCommand();
 

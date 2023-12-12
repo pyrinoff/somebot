@@ -3,18 +3,28 @@ package ru.pyrinoff.somebot.command.condition;
 
 import ru.pyrinoff.somebot.abstraction.AbstractCommand;
 import ru.pyrinoff.somebot.abstraction.AbstractMessage;
-import ru.pyrinoff.somebot.api.condition.ICondition;
+import ru.pyrinoff.somebot.api.condition.ICanBeFired;
+import ru.pyrinoff.somebot.api.condition.IConcreteCondition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
-public class Ruleset implements ICondition {
+public class Ruleset<Z, M extends AbstractMessage<Z>> implements ICanBeFired<Z, M> {
 
-    ArrayList<ICondition> conditions;
+    ArrayList<IConcreteCondition<Z, M>> conditions;
 
-    public boolean isFired(AbstractMessage message) {
-        for (ICondition oneCondition : conditions) {
+    public boolean isFired(M message) {
+        for (IConcreteCondition<Z, M> oneCondition : conditions) {
             AbstractCommand.logger.debug("Check condition: " + oneCondition);
+            AbstractCommand.logger.debug("Condition class: " + oneCondition.getMessageClass().getName() + ", message class: " + message.getOriginalMessage().getClass());
+            if (!oneCondition.getMessageClass().getName().equals("java.lang.Object")
+                    && message.getOriginalMessage().getClass() != oneCondition.getMessageClass()) { //для предотвращения ошибки класскаста
+                AbstractCommand.logger.debug("Original message class not matched (0): "
+                        + message.getOriginalMessage().getClass().getName() + " "
+                        + oneCondition.getMessageClass().getName());
+                return false;
+            }
             if (!oneCondition.isFired(message)) {
                 AbstractCommand.logger.debug("CONDITION FAILED! BREAK");
                 return false;
@@ -24,14 +34,17 @@ public class Ruleset implements ICondition {
         return true;
     }
 
-    public Ruleset addCondition(ICondition condition) {
+    public Ruleset<Z, M> addCondition(IConcreteCondition<Z, M> condition) {
         conditions.add(condition);
         return this;
     }
 
-    public Ruleset(ICondition[] conditions) {
+    public Ruleset(IConcreteCondition<Z, M>[] conditions) {
         this.conditions = new ArrayList<>(Arrays.asList(conditions));
     }
 
+    public Ruleset(IConcreteCondition<Z, M> condition) {
+        this.conditions = new ArrayList<>(Collections.singletonList(condition));
+    }
 
 }

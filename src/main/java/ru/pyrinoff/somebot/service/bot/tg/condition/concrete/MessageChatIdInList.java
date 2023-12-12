@@ -1,11 +1,14 @@
-package ru.pyrinoff.somebot.command.condition.concrete;
+/*
+package ru.pyrinoff.somebot.service.bot.tg.condition.concrete;
 
 import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.condition.ICondition;
+import ru.pyrinoff.somebot.service.bot.tg.ITgCondition;
+import ru.pyrinoff.somebot.service.bot.tg.TgMessage;
 
 import java.util.Arrays;
 
-public class MessageChatIdInList implements ICondition<AbstractMessage> {
+public class MessageChatIdInList<M extends TgMessage> implements ITgCondition {
 
     protected long[] chatIds;
 
@@ -14,9 +17,10 @@ public class MessageChatIdInList implements ICondition<AbstractMessage> {
     }
 
     @Override
-    public boolean isFired(final AbstractMessage message) {
+    public boolean isFired(final TgMessage message) {
         return message.getOriginalMessage().hasMessage()
                 && Arrays.binarySearch(chatIds, message.getOriginalMessage().getMessage().getChatId()) >= 0;
     }
 
 }
+*/

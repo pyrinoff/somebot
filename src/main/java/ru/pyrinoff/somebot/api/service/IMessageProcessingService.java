@@ -1,9 +1,9 @@
 package ru.pyrinoff.somebot.api.service;
 
-import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 
-public interface IMessageProcessingService {
+public interface IMessageProcessingService<Z, M extends AbstractMessage<Z>> {
 
-    void processUpdate(Update update);
+    void processUpdate(Z update);
 
 }

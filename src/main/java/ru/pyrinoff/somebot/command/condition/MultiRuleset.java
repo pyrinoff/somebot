@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class MultiRuleset {
+public class MultiRuleset<Z, M extends AbstractMessage<Z>> {
 
-    ArrayList<Ruleset> ruleset;
+    ArrayList<Ruleset<Z, M>> ruleset;
 
-    public boolean isFired(AbstractMessage message) {
-        for (Ruleset oneConditionList : ruleset) {
+    public boolean isFired(M message) {
+        for (Ruleset<Z, M> oneConditionList : ruleset) {
             if (oneConditionList.isFired(message)) {
                 AbstractCommand.logger.debug("ONE OF RULESET IS FIRED! GO TO PROCESSING");
                 return true;
@@ -22,7 +22,7 @@ public class MultiRuleset {
         return false;
     }
 
-    public MultiRuleset(Ruleset[] ruleset) {
+    public MultiRuleset(Ruleset<Z, M>[] ruleset) {
         this.ruleset = new ArrayList<>(Arrays.asList(ruleset));
     }
 

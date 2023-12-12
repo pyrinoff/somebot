@@ -2,31 +2,21 @@ package ru.pyrinoff.somebot.abstraction;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.pyrinoff.somebot.api.command.ICommand;
-import ru.pyrinoff.somebot.api.condition.ICondition;
+import ru.pyrinoff.somebot.api.condition.IConcreteCondition;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
 import ru.pyrinoff.somebot.command.condition.Ruleset;
-import ru.pyrinoff.somebot.service.bot.TelegramBot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public abstract class AbstractCommand<M extends AbstractMessage> implements ICommand<M> {
+public abstract class AbstractCommand<Z, M extends AbstractMessage<Z>> implements ICommand<Z, M> {
 
     public static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
-    private ArrayList<MultiRuleset> fireConditions;
-
-    @Autowired
-    @Lazy
-    @Getter
-    private TelegramBot telegramBot;
+    private ArrayList<MultiRuleset<Z, M>> fireConditions;
 
     @Getter
     @Setter
@@ -44,7 +34,7 @@ public abstract class AbstractCommand<M extends AbstractMessage> implements ICom
     @Setter
     private M message;
 
-    public ArrayList<MultiRuleset> getFireConditions() {
+    public ArrayList<MultiRuleset<Z, M>> getFireConditions() {
         if(fireConditions == null) {
             fireConditions = setupFireConditions();
             if(fireConditions == null) fireConditions = new ArrayList<>(0);
@@ -53,25 +43,31 @@ public abstract class AbstractCommand<M extends AbstractMessage> implements ICom
     }
 
     //SETUP ALIASES START
-    public ArrayList<MultiRuleset> fireConditions(MultiRuleset... multiRuleset) {
+    public ArrayList<MultiRuleset<Z, M>> fireConditions(MultiRuleset<Z, M>... multiRuleset) {
         return new ArrayList<>(Arrays.asList(multiRuleset));
     }
 
-    public MultiRuleset multiRuleset(Ruleset... ruleset) {
-        return new MultiRuleset(ruleset);
+    public MultiRuleset<Z, M> multiRuleset(Ruleset<Z, M>... ruleset) {
+        return new MultiRuleset<Z, M>(ruleset);
     }
 
-    public Ruleset ruleset(ICondition... conditions) {
-        return new Ruleset(conditions);
+    public Ruleset<Z, M> ruleset(IConcreteCondition<Z, M>... conditions) {
+        return new Ruleset<Z, M>(conditions);
     }
+
+/*    public Ruleset<Z, M> ruleset(IConcreteCondition<Z, M> condition) {
+        return new Ruleset<Z, M>(condition);
+    }*/
     //SETUP ALIASES END
 
-    public Update getOriginalMessage() {
+    public Z getOriginalMessage() {
         return getMessage().getOriginalMessage();
     }
 
+/*
     public @Nullable Long getChatId() {
         return getOriginalMessage().hasMessage() ? getOriginalMessage().getMessage().getChatId() : null;
     }
+*/
 
 }

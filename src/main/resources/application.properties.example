@@ -1,5 +1,15 @@
+tg.enabled=true
 tg.token=111222333:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 tg.botname=Somebot
+
+vk.enabled=true
+vk.groupid=GROUP_ID_FOR_EXAMPLE_1234566789
+vk.grouptoken=GROUP_TOKEN
+vk.adminid=ADMIN_ID_FOR_EXAMPLE_123456789
+vk.admintoken=ADMIN_TOKEN
+#for token generation
+vk.appid=7883306
+
 database.url=jdbc:mysql://mysql:10101/somedatabase?createDatabaseIfNotExist=true&useSSL=false&useUnicode=true&serverTimezone=Europe/Moscow&characterEncoding=utf-8
 database.username=root
 database.password=password

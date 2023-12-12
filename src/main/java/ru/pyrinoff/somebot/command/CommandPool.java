@@ -9,22 +9,25 @@ import ru.pyrinoff.somebot.abstraction.AbstractMessage;
 import ru.pyrinoff.somebot.api.command.ICommand;
 import ru.pyrinoff.somebot.command.condition.MultiRuleset;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class CommandPool<M extends AbstractMessage> {
+public class CommandPool<Z, M extends AbstractMessage<Z>> {
 
     private static final Logger logger = LoggerFactory.getLogger(CommandPool.class);
 
-    private List<ICommand<M>> commandList = Collections.emptyList();
+    private List<ICommand<Z, M>> commandList = Collections.emptyList();
 
-    public CommandPool(@Autowired final ICommand<M>[] commands) {
+    public CommandPool(@Autowired final ICommand<Z, M>[] commands) {
         setCommandList(new ArrayList<>(List.of(commands)));
         logger.info("Initialized with "+ commandList.size()+" commands! " + commandList);
     }
 
-    public CommandPool<M> setCommandList(final List<ICommand<M>> commandList) {
+    public CommandPool<Z, M> setCommandList(final List<ICommand<Z, M>> commandList) {
         this.commandList = commandList;
         prepareCommandList();
         return this;
@@ -35,8 +38,8 @@ public class CommandPool<M extends AbstractMessage> {
         Collections.sort(commandList, Comparator.comparingInt(ICommand::getPriority));
     }
 
-    public CommandPool<M> addSingleCommand(Class<? extends ICommand<M>> commandClass) throws DuplicateMemberException {
-        ICommand<M> command;
+    public CommandPool<Z, M> addSingleCommand(Class<? extends ICommand<Z, M>> commandClass) throws DuplicateMemberException {
+        ICommand<Z, M> command;
         try {
             command = commandClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -49,9 +52,9 @@ public class CommandPool<M extends AbstractMessage> {
         return this;
     }
 
-    public List<ICommand<M>> getFiredCommands(final M message) {
-        final List<ICommand<M>> commandsFired = new ArrayList<>();
-        for (final ICommand<M> command : commandList) {
+    public List<ICommand<Z, M>> getFiredCommands(final M message) {
+        final List<ICommand<Z, M>> commandsFired = new ArrayList<>();
+        for (final ICommand<Z, M> command : commandList) {
             if (isCommandFired(message, command)) {
                 commandsFired.add(command);
             }
@@ -60,9 +63,9 @@ public class CommandPool<M extends AbstractMessage> {
         return commandsFired;
     }
 
-    public boolean isCommandFired(final M message, final ICommand<M> command) {
+    public boolean isCommandFired(final M message, final ICommand<Z, M> command) {
         logger.debug("Check fire condition of command: " + command.getClass());
-        for (MultiRuleset oneRuleset : command.getFireConditions()) {
+        for (MultiRuleset<Z, M> oneRuleset : command.getFireConditions()) {
             logger.debug("Checking MultiRuleset: " + oneRuleset.getClass().getName());
             if (oneRuleset.isFired(message)) {
                 logger.debug("Command should be fired: " + command.getClass());

@@ -2,25 +2,23 @@ package ru.pyrinoff.somebot.component;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import ru.pyrinoff.somebot.service.bot.TelegramBot;
+import ru.pyrinoff.somebot.abstraction.AbstractBot;
 
 @Component
 //@DependsOn("PropertyService")
 public class Bootstrap {
 
-    @Autowired TelegramBot telegramBot;
+    @Autowired AbstractBot[] bots;
 
     public void start() {
-        try {
-            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(telegramBot);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        for (AbstractBot oneBot : bots) {
+            try {
+                oneBot.initialize();
+            }
+            catch (Exception e) {
+                System.out.println("Cant initialize bot: " + oneBot.getClass().getName());
+            }
         }
     }
-
 
 }
