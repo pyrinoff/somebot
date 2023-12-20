@@ -1,14 +1,13 @@
-/*
 package ru.pyrinoff.somebot.service.bot.tg.condition.concrete;
 
-import ru.pyrinoff.somebot.service.bot.tg.ITgCondition;
 import ru.pyrinoff.somebot.service.bot.tg.TgMessage;
+import ru.pyrinoff.somebot.service.bot.tg.condition.AbstractTgCondition;
 
-public class HasTextEquals<M extends TgMessage> implements ITgCondition {
+public class HasTextEqualsTg<M extends TgMessage> implements AbstractTgCondition<M> {
 
     final String theText;
 
-    public HasTextEquals(final String text) {
+    public HasTextEqualsTg(final String text) {
         this.theText = text;
     }
 
@@ -20,4 +19,3 @@ public class HasTextEquals<M extends TgMessage> implements ITgCondition {
     }
 
 }
-*/

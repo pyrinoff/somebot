@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'ru.pyrinoff'
-version '0.2.2'
+version '0.2.3'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -54,10 +54,6 @@ publishing {
         maven(MavenPublication) {
             from components.java
         }
-
-//        library(MavenPublication) {
-//            setGroupId customGroup
-//        }
     }
 
     repositories {
