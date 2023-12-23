@@ -5,10 +5,10 @@ import com.github.pyrinoff.somebot.api.service.IDatabaseDataProvider;
 import org.hibernate.cfg.Environment;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -20,9 +20,10 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 
-@ConditionalOnExpression("${database.enabled:true}")
+//@ConditionalOnExpression("${database.enabled:true}")
 @PropertySource("classpath:application.properties")
 @Configuration
+@EnableJpaRepositories("com.github.pyrinoff.somebot.repository")
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 
@@ -52,7 +53,7 @@ public class DatabaseConfiguration {
         @NotNull final LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
         factoryBean.setDataSource(dataSource);
         factoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        factoryBean.setPackagesToScan("ru.pyrinoff.somebot.model", Somebot.databasePackages);
+        factoryBean.setPackagesToScan(Somebot.PACKAGE_TO_SCAN, Somebot.databasePackages);
         @NotNull final Properties properties = new Properties();
         properties.put(Environment.DIALECT, databasePropertyService.getDatabaseDialect());
         properties.put(Environment.HBM2DDL_AUTO, databasePropertyService.getDatabaseHbm2ddlAuto());

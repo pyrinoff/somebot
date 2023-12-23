@@ -2,7 +2,7 @@ package com.github.pyrinoff.somebot.model;
 
 import com.github.pyrinoff.somebot.abstraction.AbstractMessage;
 
-public class AnyMessage extends AbstractMessage<Object> {
+public class AnyMessage<U extends User> extends AbstractMessage<Object, U> {
 
     public AnyMessage(Object originalMessage) {
         super(originalMessage);

@@ -1,5 +1,8 @@
 package com.github.pyrinoff.somebot.service.bot.tg;
 
+import com.github.pyrinoff.somebot.abstraction.AbstractBot;
+import com.github.pyrinoff.somebot.service.PropertyService;
+import com.github.pyrinoff.somebot.service.bot.tg.api.ITgMessageProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +20,6 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import com.github.pyrinoff.somebot.abstraction.AbstractBot;
-import com.github.pyrinoff.somebot.service.PropertyService;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,7 +34,8 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
 
     @Autowired PropertyService propertyService;
 
-    @Autowired TgMessageProcessingService processingService;
+    @Autowired
+    ITgMessageProcessingService processingService;
 
     @Override
     public String getBotUsername() {

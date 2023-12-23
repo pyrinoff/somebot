@@ -1,12 +1,12 @@
 package com.github.pyrinoff.somebot.service;
 
 import com.github.pyrinoff.somebot.api.service.IDatabaseDataProvider;
+import com.github.pyrinoff.somebot.api.service.ITelegramDataProvider;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-import com.github.pyrinoff.somebot.api.service.ITelegramDataProvider;
 
 @Service
 @Getter

@@ -114,3 +114,4 @@ src/main/resources/application.properties
 /src/main/java/org
 .gitlab-ci.yml
 /src/main/java/ru/pyrinoff/examples/
+/src/main/java/com/github/pyrinoff/bots/

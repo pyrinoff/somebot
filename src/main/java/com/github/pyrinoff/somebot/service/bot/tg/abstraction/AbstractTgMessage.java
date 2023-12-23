@@ -1,19 +1,22 @@
-package com.github.pyrinoff.somebot.service.bot.tg;
+package com.github.pyrinoff.somebot.service.bot.tg.abstraction;
 
 import com.github.pyrinoff.somebot.abstraction.AbstractMessage;
 import com.github.pyrinoff.somebot.api.command.ICommandWithText;
+import com.github.pyrinoff.somebot.model.User;
 import lombok.Getter;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Getter
-public class TgMessage extends AbstractMessage<Update> implements ICommandWithText {
+public abstract class AbstractTgMessage<U extends User> extends AbstractMessage<Update, U> implements ICommandWithText {
 
-    public TgMessage(Update originalMessage) {
+    public AbstractTgMessage(Update originalMessage) {
         super(originalMessage);
     }
 
     public String getText() {
-        if(!getOriginalMessage().hasMessage() || getOriginalMessage().getMessage().getText().isEmpty() || getOriginalMessage().getMessage().getText() == null)
+        if(!getOriginalMessage().hasMessage()
+                || getOriginalMessage().getMessage().getText().isEmpty()
+                || getOriginalMessage().getMessage().getText() == null)
             throw new RuntimeException("Cant get text from this update!");
         return getOriginalMessage().getMessage().getText();
     }

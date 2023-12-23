@@ -2,6 +2,7 @@ package com.github.pyrinoff.somebot.service.bot.vk;
 
 import com.github.pyrinoff.somebot.abstraction.AbstractBot;
 import com.github.pyrinoff.somebot.service.PropertyService;
+import com.github.pyrinoff.somebot.service.bot.vk.api.IVkMessageProcessingService;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.exceptions.ApiException;
@@ -24,7 +25,7 @@ public class VkBot implements AbstractBot {
     @Autowired
     PropertyService propertyService;
 
-    @Autowired VkMessageProcessingService processingService;
+    @Autowired IVkMessageProcessingService processingService;
     private GroupActor groupActor;
     private VkApiClient vkApiClient;
     private VkBotHandler handler;
@@ -49,8 +50,6 @@ public class VkBot implements AbstractBot {
     public void onUpdateReceived(MessageObject update) {
         processingService.processUpdate(update);
     }
-
-
 
     public void sendMessage(Integer chatId, String textToSend, Boolean protect) {
         sendMessage(chatId, textToSend, protect, null);
@@ -192,8 +191,8 @@ public class VkBot implements AbstractBot {
     }
 */
 
-    public void sendMessageBack(VkMessage message, String text, Boolean protect) {
-        sendMessage(message.getOriginalMessage().getMessage().getPeerId(), text, protect);
+    public void sendMessageBack(MessageObject message, String text, Boolean protect) {
+        sendMessage(message.getMessage().getPeerId(), text, protect);
     }
 
 /*

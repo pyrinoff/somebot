@@ -6,7 +6,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class Somebot {
 
-    private final static String PACKAGE_TO_SCAN = "com.github.pyrinoff.somebot";
+    public final static String PACKAGE_TO_SCAN = "com.github.pyrinoff.somebot";
 
     String commandPackage;
 
