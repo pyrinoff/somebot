@@ -1,5 +1,5 @@
 package com.github.pyrinoff.somebot.exception.model;
 
-public class UserNullException extends Throwable {
+public class UserNullException extends RuntimeException {
 
 }

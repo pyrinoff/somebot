@@ -61,6 +61,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(textToSend);
         sendMessage.setProtectContent(protect);
+        sendMessage.enableHtml(true);
         if(replyToMessageId != null) sendMessage.setReplyToMessageId(replyToMessageId);
         try {
             execute(sendMessage);

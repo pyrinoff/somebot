@@ -4,11 +4,13 @@ import com.github.pyrinoff.somebot.api.command.ICommand;
 import com.github.pyrinoff.somebot.api.condition.IConcreteCondition;
 import com.github.pyrinoff.somebot.command.condition.MultiRuleset;
 import com.github.pyrinoff.somebot.command.condition.Ruleset;
+import com.github.pyrinoff.somebot.exception.model.UserNullException;
 import com.github.pyrinoff.somebot.model.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +43,34 @@ public abstract class AbstractCommand<Z, U extends User, M extends AbstractMessa
             if (fireConditions == null) fireConditions = new ArrayList<>(0);
         }
         return fireConditions;
+    }
+
+    public U getUser() {
+        return getMessage().getUser();
+    }
+
+    public Integer getStage() {
+        if(getMessage().getUser() == null) throw new UserNullException();
+        return getMessage().getUser().getStage();
+    }
+
+    public Integer isStage(int stage) {
+        if(getMessage().getUser() == null) throw new UserNullException();
+        return getMessage().getUser().getStage();
+    }
+
+    public void setStage(int stage) {
+        if(getMessage().getUser() == null) throw new UserNullException();
+        getMessage().getUser().setStage(stage);
+    }
+
+    public void setDefaultStage() {
+        getUser().setDefaultStage();
+    }
+
+    public boolean isDefaultStage() {
+        if(getMessage().getUser() == null) throw new UserNullException();
+        return getUser().isDefaultStage();
     }
 
     //SETUP ALIASES START

@@ -58,4 +58,8 @@ public class User {
         setStage(STAGE_NONE);
     }
 
+    public boolean isDefaultStage() {
+        return getStage() == STAGE_NONE;
+    }
+
 }

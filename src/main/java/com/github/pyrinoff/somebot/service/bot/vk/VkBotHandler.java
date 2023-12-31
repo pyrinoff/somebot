@@ -26,13 +26,8 @@ public class VkBotHandler extends GroupLongPollApi {
     @Override
     protected void messageNew(Integer groupId, MessageObject update) {
         Message message = update.getMessage();
-
-        logger.debug("Message new in " + this.getClass()+", group id: "+groupId);
-        logger.debug("--------------");
-        System.out.println(message.toPrettyString());
-        logger.debug("--------------");
+        logger.debug(message.toPrettyString());
         vkBot.onUpdateReceived(update);
-
     }
 
 

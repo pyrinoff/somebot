@@ -58,6 +58,7 @@ public abstract class AbstractMessageProcessingService<Z, U extends User, M exte
                 break;
             }
             if (oneCommand.isProcessNewCircle()) {
+                oneCommand.setProcessNewCircle(false);
                 processMessage(message);
                 break;
             }

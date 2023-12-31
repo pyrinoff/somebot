@@ -5,16 +5,24 @@ import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.vk.api.IVkMessageProcessingService;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
+import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.callback.MessageObject;
+import com.vk.api.sdk.objects.users.responses.GetResponse;
 import com.vk.api.sdk.queries.messages.MessagesSendQuery;
+import com.vk.api.sdk.queries.users.UsersGetQuery;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 @Component
@@ -252,10 +260,42 @@ public class VkBot implements AbstractBot {
     }
 */
 
+    public List<GetResponse> getUserInfo(@Nullable String idsOrUsernames, @Nullable ArrayList<String> fieldsList) {
+        HashMap<String, String> hashMap = new HashMap<>();
+//        UsersGetQuery usersGetQuery = null;
+//        if (actor instanceof GroupActor) usersGetQuery = vkApiClient.users().get((GroupActor) actor);
+//        else usersGetQuery = vkApiClient.users().get((UserActor) actor);
+        UsersGetQuery usersGetQuery = vkApiClient.users().get(groupActor);
+        if (idsOrUsernames != null) usersGetQuery.userIds(idsOrUsernames);
+
+        if (fieldsList == null) {
+            fieldsList = new ArrayList<>();
+            fieldsList.add("screen_name");
+            fieldsList.add("first_name");
+            fieldsList.add("last_name");
+        }
+
+        List<GetResponse> responses = new ArrayList<>();
+        try {
+            responses = usersGetQuery.execute();
+        } catch (ApiException | ClientException e) {
+            e.printStackTrace();
+        }
+
+        if (responses.size() > 1) {
+            logger.error("getUserInfo returns " + responses.size() + " responses!!!");
+        }
+        return responses;
+    }
+
+    public GetResponse getUserInfo(@NotNull Integer id, @Nullable ArrayList<String> fieldsList) {
+        return getUserInfo(String.valueOf(id), fieldsList).get(0);
+    }
+
     @Override
     public void initialize() {
         if(!propertyService.getVkEnabled()) {
-            logger.info("Telegram bot: disabled");
+            logger.info("Vk bot: disabled");
             return;
         }
 
