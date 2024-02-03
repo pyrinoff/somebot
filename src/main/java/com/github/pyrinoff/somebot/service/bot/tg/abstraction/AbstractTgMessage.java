@@ -4,6 +4,7 @@ import com.github.pyrinoff.somebot.abstraction.AbstractMessage;
 import com.github.pyrinoff.somebot.api.command.ICommandWithText;
 import com.github.pyrinoff.somebot.model.User;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Getter
@@ -21,11 +22,15 @@ public abstract class AbstractTgMessage<U extends User> extends AbstractMessage<
         return getOriginalMessage().getMessage().getText();
     }
 
+    @Nullable
     public Long getSenderChatId() {
+        if(getOriginalMessage().getMessage() == null) return null;
         return getOriginalMessage().getMessage().getChatId();
     }
 
+    @Nullable
     public Integer getMessageTimestamp() {
+        if(getOriginalMessage().getMessage() == null) return null;
         return getOriginalMessage().getMessage().getDate();
     }
 

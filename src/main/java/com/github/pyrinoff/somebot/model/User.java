@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -44,6 +46,16 @@ public class User {
     protected byte[] customData = null;
 
     public static final int STAGE_NONE = 0;
+
+    @Column (name = "created_date", nullable = false, updatable = false, columnDefinition = "datetime DEFAULT '1970-01-01 00:00:00'")
+    @NotNull
+    @CreatedDate //not working
+    protected Date createdDate = new Date();
+
+    //@Column (name = "modified_date", , columnDefinition = "datetime DEFAULT '1970-01-01 00:00:00'")
+    //@Nullable
+    //@LastModifiedDate
+    //protected Date modifiedDate;
 
     @Override
     public String toString() {

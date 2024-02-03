@@ -79,18 +79,19 @@ public abstract class AbstractMessageProcessingService<Z, U extends User, M exte
 
     public void preprocessMessage(final M message) {
         if(message.getOriginalMessage() == null) return;
-        if(message.getSenderChatId() == null) return;
         Long chatId = message.getSenderChatId();
-        U user = userService.getUser(chatId);
-        if (user == null) {
-            user = userService.createUser(chatId);
+        if(chatId != null) {
+            U user = userService.getUser(chatId);
             if (user == null) {
-                logger.error("Cant registerUser!");
-                return;
+                user = userService.createUser(chatId);
+                if (user == null) {
+                    logger.error("Cant registerUser!");
+                    return;
+                }
+                message.setFirstMessageFromUser(true);
             }
-            message.setFirstMessageFromUser(true);
+            message.setUser(user);
         }
-        message.setUser(user);
     }
 
     protected void postProcessMessage(M message) {

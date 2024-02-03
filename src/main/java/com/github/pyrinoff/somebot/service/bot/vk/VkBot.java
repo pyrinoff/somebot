@@ -5,11 +5,11 @@ import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.vk.api.IVkMessageProcessingService;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
-import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.callback.MessageObject;
+import com.vk.api.sdk.objects.messages.Keyboard;
 import com.vk.api.sdk.objects.users.responses.GetResponse;
 import com.vk.api.sdk.queries.messages.MessagesSendQuery;
 import com.vk.api.sdk.queries.users.UsersGetQuery;
@@ -33,7 +33,8 @@ public class VkBot implements AbstractBot {
     @Autowired
     PropertyService propertyService;
 
-    @Autowired IVkMessageProcessingService processingService;
+    @Autowired
+    IVkMessageProcessingService processingService;
     private GroupActor groupActor;
     private VkApiClient vkApiClient;
     private VkBotHandler handler;
@@ -59,11 +60,32 @@ public class VkBot implements AbstractBot {
         processingService.processUpdate(update);
     }
 
-    public void sendMessage(Integer chatId, String textToSend, Boolean protect) {
-        sendMessage(chatId, textToSend, protect, null);
+    public void sendMessageBack(MessageObject message, String text) {
+        sendMessage(message.getMessage().getPeerId(), text, false);
     }
 
-    public void sendMessage(Integer chatId, String textToSend, Boolean protect, Integer replyToMessageId) {
+    public void sendMessageBack(MessageObject message, String text, Boolean protect) {
+        sendMessage(message.getMessage().getPeerId(), text, protect);
+    }
+
+    public void sendMessageBack(MessageObject message, String textToSend, @Nullable Keyboard keyboard, Boolean protect, @Nullable Integer replyToMessageId) {
+        sendMessage(message.getMessage().getPeerId(), textToSend, keyboard, protect, replyToMessageId);
+    }
+
+    public void sendMessage(Integer chatId, String textToSend, Boolean protect) {
+        sendMessage(chatId, textToSend, null, protect, null);
+    }
+
+    public void sendMessage(Integer chatId, String textToSend) {
+        sendMessage(chatId, textToSend, null, false, null);
+    }
+
+    public void sendMessage(Integer chatId,
+                            String textToSend,
+                            @Nullable Keyboard keyboard,
+                            Boolean protect,
+                            @Nullable Integer replyToMessageId
+    ) {
 /*        if (messageToBot.getText() == null && !messageToBot.hasAttachments()) {
             logger.error("No text and no attachments! Skip the message");
             return;
@@ -77,7 +99,8 @@ public class VkBot implements AbstractBot {
         messagesSendQuery.peerId(chatId);
 
         //Text
-        if(textToSend != null) messagesSendQuery.message(textToSend);
+        if (textToSend != null) messagesSendQuery.message(textToSend);
+        if (keyboard != null) messagesSendQuery.keyboard(keyboard);
 
         /*
         //menu data
@@ -198,11 +221,6 @@ public class VkBot implements AbstractBot {
         }
     }
 */
-
-    public void sendMessageBack(MessageObject message, String text, Boolean protect) {
-        sendMessage(message.getMessage().getPeerId(), text, protect);
-    }
-
 /*
     public void sendPhotoBack(final Update update, final String filepath, final String caption, final Boolean protect, final boolean fromClasspath) {
         final String chatId = String.valueOf(update.getMessage().getChatId());
@@ -294,7 +312,7 @@ public class VkBot implements AbstractBot {
 
     @Override
     public void initialize() {
-        if(!propertyService.getVkEnabled()) {
+        if (!propertyService.getVkEnabled()) {
             logger.info("Vk bot: disabled");
             return;
         }

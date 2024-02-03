@@ -26,6 +26,7 @@ public class AbstractUserService<U extends User> implements IUserService<U> {
     public U createUser(Long chatId) {
         U user = createUserFromGeneric();
         user.setChatId(chatId);
+        //user.setCreatedDate(new Date());
         return saveUser(user);
     }
 
