@@ -14,4 +14,6 @@ public interface IUserService<U extends User> {
 
     U addOrUpdate(@NotNull final U user);
 
+    U changeUserBalance(@NotNull final U user, double amount);
+
 }

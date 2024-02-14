@@ -26,10 +26,18 @@ public class Ruleset<Z, U extends User, M extends AbstractMessage<Z, U>> impleme
                         + oneCondition.getMessageClass().getName());
                 return false;
             }
-            if (!oneCondition.isFired(message)) {
-                AbstractCommand.logger.debug("CONDITION FAILED! BREAK");
+            try {
+                if (!oneCondition.isFired(message)) {
+                    AbstractCommand.logger.debug("CONDITION FAILED! BREAK");
+                    return false;
+                } else AbstractCommand.logger.debug("CONDITION OK! BUT NEED TO CHECK NEXT");
+            } catch (RuntimeException e) {
+                AbstractCommand.logger.error("Exception during process this Ruleset " +
+                        "("+ this.getClass().getName()  +")" +
+                        ": " + e.getMessage());
+                e.printStackTrace();
                 return false;
-            } else AbstractCommand.logger.debug("CONDITION OK! BUT NEED TO CHECK NEXT");
+            }
         }
         AbstractCommand.logger.debug("ALL CONDITIONS IN RULESET FIRED! GO!");
         return true;

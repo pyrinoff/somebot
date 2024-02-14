@@ -25,7 +25,7 @@ public class CommandPool<Z, U extends User, M extends AbstractMessage<Z, U>> {
 
     public CommandPool(@Autowired final ICommand<Z, U, M>[] commands) {
         setCommandList(new ArrayList<>(List.of(commands)));
-        logger.info("Initialized with "+ commandList.size()+" commands! " + commandList);
+        logger.info("Initialized with " + commandList.size() + " commands! " + commandList);
     }
 
     public CommandPool<Z, U, M> setCommandList(final List<ICommand<Z, U, M>> commandList) {
@@ -36,7 +36,10 @@ public class CommandPool<Z, U extends User, M extends AbstractMessage<Z, U>> {
 
     private void prepareCommandList() {
         commandList = commandList.stream().filter(ICommand::isCommandEnabled).collect(Collectors.toList());
-        Collections.sort(commandList, Comparator.comparingInt(ICommand::getPriority));
+    }
+
+    private void sortCommandList(List<ICommand<Z, U, M>> commandList) {
+        commandList.sort(Comparator.comparingInt(ICommand::getPriority));
     }
 
     public CommandPool<Z, U, M> addSingleCommand(Class<? extends ICommand<Z, U, M>> commandClass) throws DuplicateMemberException {
@@ -49,7 +52,7 @@ public class CommandPool<Z, U extends User, M extends AbstractMessage<Z, U>> {
         }
         commandList.add(command);
         prepareCommandList();
-        logger.info("Another command added. Full size of commands: "+ commandList.size());
+        logger.info("Another command added. Full size of commands: " + commandList.size());
         return this;
     }
 
@@ -60,7 +63,10 @@ public class CommandPool<Z, U extends User, M extends AbstractMessage<Z, U>> {
                 commandsFired.add(command);
             }
         }
+        sortCommandList(commandsFired);
         logger.debug("Fired commands count: " + commandsFired.size() + ", list: " + commandsFired);
+        for (ICommand<Z, U, M> zumiCommand : commandsFired) {
+        }
         return commandsFired;
     }
 
@@ -70,6 +76,7 @@ public class CommandPool<Z, U extends User, M extends AbstractMessage<Z, U>> {
             logger.debug("Checking MultiRuleset: " + oneRuleset.getClass().getName());
             if (oneRuleset.isFired(message)) {
                 logger.debug("Command should be fired: " + command.getClass());
+                command.setPriority(oneRuleset.getPriority());
                 return true;
             }
         }

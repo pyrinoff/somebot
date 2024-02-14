@@ -12,6 +12,8 @@ public interface ICommand<Z, U extends User, M extends AbstractMessage<Z, U>> {
 
     int getPriority();
 
+    void setPriority(int priority);
+
     ArrayList<MultiRuleset<Z, U, M>> setupFireConditions();
 
     boolean isProceedNextCommand();

@@ -1,6 +1,7 @@
 tg.enabled=true
 tg.token=111222333:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 tg.botname=Somebot
+tg.admin.id=123456789
 
 vk.enabled=true
 vk.groupid=GROUP_ID_FOR_EXAMPLE_1234566789

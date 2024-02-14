@@ -31,7 +31,13 @@ public abstract class AbstractMessageProcessingService<Z, U extends User, M exte
 
     @Override
     public void processUpdate(final Z update) {
-        messageProcessing(convertUpdateToMessage(update));
+        try {
+            messageProcessing(convertUpdateToMessage(update));
+        }
+        catch(RuntimeException e) {
+            logger.error("Exception during process this update: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void messageProcessing(final M message) {

@@ -36,6 +36,11 @@ public abstract class AbstractCommand<Z, U extends User, M extends AbstractMessa
     @Setter
     private M message;
 
+    @Getter
+    @Setter
+    private int priority;
+
+
     public ArrayList<MultiRuleset<Z, U, M>> getFireConditions() {
         if (fireConditions == null) {
             fireConditions = setupFireConditions();
@@ -77,8 +82,8 @@ public abstract class AbstractCommand<Z, U extends User, M extends AbstractMessa
         return new ArrayList<>(Arrays.asList(multiRuleset));
     }
 
-    public MultiRuleset<Z, U, M> multiRuleset(Ruleset<Z, U, M>... ruleset) {
-        return new MultiRuleset<>(ruleset);
+    public MultiRuleset<Z, U, M> multiRuleset(int priority, Ruleset<Z, U, M>... ruleset) {
+        return new MultiRuleset<>(priority, ruleset);
     }
 
     public Ruleset<Z, U, M> ruleset(IConcreteCondition<Z, U, M>... conditions) {

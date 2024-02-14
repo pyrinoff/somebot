@@ -1,18 +1,36 @@
 package com.github.pyrinoff.somebot.service.bot.vk;
 
 import com.github.pyrinoff.somebot.abstraction.AbstractBot;
+import com.github.pyrinoff.somebot.exception.service.CantParseDocDownloadLinkException;
+import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.vk.api.IVkMessageProcessingService;
+import com.github.pyrinoff.somebot.util.GetByUrlUtil;
+import com.github.pyrinoff.somebot.util.RegexUtils;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
+import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.callback.MessageObject;
+import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.messages.Keyboard;
+import com.vk.api.sdk.objects.messages.Message;
+import com.vk.api.sdk.objects.photos.responses.GetWallUploadServerResponse;
+import com.vk.api.sdk.objects.photos.responses.PhotoUploadResponse;
+import com.vk.api.sdk.objects.photos.responses.SaveWallPhotoResponse;
+import com.vk.api.sdk.objects.responses.VideoUploadResponse;
 import com.vk.api.sdk.objects.users.responses.GetResponse;
+import com.vk.api.sdk.objects.video.responses.SaveResponse;
+import com.vk.api.sdk.queries.messages.MessagesGetByIdQuery;
 import com.vk.api.sdk.queries.messages.MessagesSendQuery;
+import com.vk.api.sdk.queries.photos.PhotosGetWallUploadServerQuery;
+import com.vk.api.sdk.queries.photos.PhotosSaveWallPhotoQuery;
+import com.vk.api.sdk.queries.upload.UploadPhotoQuery;
 import com.vk.api.sdk.queries.users.UsersGetQuery;
+import com.vk.api.sdk.queries.video.VideoSaveQuery;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -20,10 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
 @Component
 public class VkBot implements AbstractBot {
@@ -35,9 +53,18 @@ public class VkBot implements AbstractBot {
 
     @Autowired
     IVkMessageProcessingService processingService;
+
+    @Getter
     private GroupActor groupActor;
+
+    @Getter
+    private UserActor userActor;
+
+    @Getter
     private VkApiClient vkApiClient;
+
     private VkBotHandler handler;
+
     private Random randomUtil;
 
     public Integer getGroupId() {
@@ -52,7 +79,7 @@ public class VkBot implements AbstractBot {
         return propertyService.getVkAdminToken();
     }
 
-    public String getAdminId() {
+    public Integer getAdminId() {
         return propertyService.getVkAdminId();
     }
 
@@ -61,30 +88,35 @@ public class VkBot implements AbstractBot {
     }
 
     public void sendMessageBack(MessageObject message, String text) {
-        sendMessage(message.getMessage().getPeerId(), text, false);
+        sendMessage(message.getMessage().getPeerId(), text, null);
     }
 
-    public void sendMessageBack(MessageObject message, String text, Boolean protect) {
-        sendMessage(message.getMessage().getPeerId(), text, protect);
+    public void sendMessageBack(User user, String text) {
+        sendMessage(user.getChatId().intValue(), text, null);
     }
 
-    public void sendMessageBack(MessageObject message, String textToSend, @Nullable Keyboard keyboard, Boolean protect, @Nullable Integer replyToMessageId) {
-        sendMessage(message.getMessage().getPeerId(), textToSend, keyboard, protect, replyToMessageId);
+    public void sendMessageBack(MessageObject message, String text, @Nullable Keyboard keyboard) {
+        sendMessage(message.getMessage().getPeerId(), text, keyboard);
     }
 
-    public void sendMessage(Integer chatId, String textToSend, Boolean protect) {
-        sendMessage(chatId, textToSend, null, protect, null);
+    public void sendMessageBack(User user, String textToSend, @Nullable Keyboard keyboard
+    ) {
+        sendMessage(user.getChatId().intValue(), textToSend, keyboard, null, null);
     }
 
     public void sendMessage(Integer chatId, String textToSend) {
-        sendMessage(chatId, textToSend, null, false, null);
+        sendMessage(chatId, textToSend, null, null, null);
+    }
+
+    public void sendMessage(Integer chatId, String textToSend, @Nullable Keyboard keyboard) {
+        sendMessage(chatId, textToSend, keyboard, null, null);
     }
 
     public void sendMessage(Integer chatId,
                             String textToSend,
                             @Nullable Keyboard keyboard,
-                            Boolean protect,
-                            @Nullable Integer replyToMessageId
+                            @Nullable Integer replyToMessageId,
+                            @Nullable Integer[] forwardMessages
     ) {
 /*        if (messageToBot.getText() == null && !messageToBot.hasAttachments()) {
             logger.error("No text and no attachments! Skip the message");
@@ -100,7 +132,10 @@ public class VkBot implements AbstractBot {
 
         //Text
         if (textToSend != null) messagesSendQuery.message(textToSend);
-        if (keyboard != null) messagesSendQuery.keyboard(keyboard);
+        if (keyboard != null) {
+            messagesSendQuery.keyboard(keyboard);
+        }
+        if (forwardMessages != null) messagesSendQuery.forwardMessages(forwardMessages);
 
         /*
         //menu data
@@ -319,6 +354,7 @@ public class VkBot implements AbstractBot {
 
         vkApiClient = new VkApiClient(new HttpTransportClient());
         groupActor = new GroupActor(getGroupId(), getGroupToken());
+        userActor = new UserActor(getAdminId(), getAdminToken());
         handler = new VkBotHandler(vkApiClient, groupActor, 100, this);
         randomUtil = new Random();
 
@@ -328,6 +364,134 @@ public class VkBot implements AbstractBot {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Message> getMessages(Integer... messageIds) {
+        MessagesGetByIdQuery messagesGetByIdQuery = vkApiClient.messages().getById(groupActor, messageIds);
+        try {
+            return messagesGetByIdQuery.execute().getItems();
+        } catch (ApiException | ClientException e) {
+            logger.error("Cant getMessages, ex: " + Arrays.toString(e.getStackTrace()));
+            return Collections.emptyList();
+            //throw new RuntimeException(e);
+        }
+    }
+
+    public static String getPostUrl(Integer groupId, Integer postId, boolean isGroup) {
+        return "https://vk.com/wall" + getPostIdAsString(groupId, postId, isGroup);
+    }
+
+    public static String getPostIdAsString(Integer ownerId, Integer postId, boolean isGroup) {
+        if (isGroup && ownerId > 0) ownerId = -1 * ownerId;
+        return ownerId + "_" + postId;
+    }
+
+    public List<String> uploadPhotos(Integer wallId, boolean isGroup, List<String> filepaths) throws ClientException, ApiException {
+        if (wallId == null) throw new IllegalArgumentException("uploadPhoto: wallId is null");
+        if (wallId < 0) wallId = Math.abs(wallId); //в этом методе только плюсовые
+        URI photoUploadServer = null;
+        List<String> attachmentsStrings = new ArrayList<>();
+        VkApiClient vkApiClient = getNewVkApiClient();
+        //vkApiClient.setVersion("5.131");
+
+        for (String oneFilepath : filepaths) {
+            if (photoUploadServer == null) {
+                PhotosGetWallUploadServerQuery wallUploadServerQuery = vkApiClient.photos().getWallUploadServer(userActor);
+                wallUploadServerQuery.groupId(wallId);
+                GetWallUploadServerResponse wallUploadServerResponse = wallUploadServerQuery.execute();
+                photoUploadServer = wallUploadServerResponse.getUploadUrl();
+            }
+            UploadPhotoQuery uploadPhotoQuery = vkApiClient.upload().photo(photoUploadServer.toString(),
+                    new File(((oneFilepath)))
+            );
+            PhotoUploadResponse photoUploadResponse = uploadPhotoQuery.execute();
+            logger.debug("addAttachmentsToWall: photo uploaded, will saveMessagesPhoto");
+
+            PhotosSaveWallPhotoQuery photosSaveWallPhotoQuery = vkApiClient.photos().saveWallPhoto(userActor
+                    , photoUploadResponse.getPhoto()).hash(photoUploadResponse.getHash()).server(photoUploadResponse.getServer());
+            if (isGroup) photosSaveWallPhotoQuery.groupId(wallId);
+            else photosSaveWallPhotoQuery.userId(wallId);
+
+            List<SaveWallPhotoResponse> saveWallPhotoResponses = photosSaveWallPhotoQuery.execute();
+
+            for (SaveWallPhotoResponse oneSaved : saveWallPhotoResponses) {
+                String attachmentString = "photo" + oneSaved.getOwnerId() + "_" + oneSaved.getId();
+                attachmentsStrings.add(attachmentString);
+                logger.debug("addAttachmentsToWall: photo saveWallPhoto: " + attachmentString);
+            }
+        }
+        if (attachmentsStrings.size() < 1) return null;
+        return attachmentsStrings;
+    }
+
+    public static String getVkMentionString(Integer userId, String textString) {
+        return "[id" + userId + "|" + textString + "]";
+    }
+
+    private static Integer getCorrectOwnerId(Integer ownerId, boolean isGroup) {
+        if (isGroup && ownerId > 0 || !isGroup && ownerId < 0) return -1 * ownerId;
+        return ownerId;
+    }
+
+    public String getVkMentionStringWithName(Integer id) {
+        GetResponse userInfo = getUserInfo(id, null);
+        String mentionString = userInfo.getFirstName() + " " + userInfo.getLastName();
+        return getVkMentionString(id, mentionString);
+    }
+
+    public static String getPmInGroupUrl(Integer groupId, Integer userId) {
+        return "https://vk.com/gim" + groupId + "?sel=" + userId;
+    }
+
+    public static String getIdString(Integer userId) {
+        return "https://vk.com/id" + userId;
+    }
+
+    private VkApiClient getNewVkApiClient() {
+        return new VkApiClient(new HttpTransportClient());
+    }
+
+
+    public String uploadVideo(Integer wallId, String filepath, @Nullable String videoName, @Nullable String description) {
+        if (wallId == null) throw new IllegalArgumentException("uploadVideo: wallId is null");
+        wallId = Math.abs(wallId); //в этом методе только плюсовые
+        VkApiClient vkApiClient = getNewVkApiClient();
+        //vkApiClient.setVersion("5.199");
+
+        VideoSaveQuery videoSaveQuery = vkApiClient.videos().save(userActor);
+        videoSaveQuery.groupId(wallId);
+        videoSaveQuery.isPrivate(false);
+        if (videoName != null) videoSaveQuery.name(videoName);
+        if (description != null) videoSaveQuery.description(description);
+        SaveResponse saveResponse = null;
+        try {
+            saveResponse = videoSaveQuery.execute();
+        } catch (ApiException |
+                 ClientException e) { //выглядит не оч красиво, но за счет RuntimeException можем юзать стримы в будущем
+            throw new RuntimeException(e);
+        }
+        try {
+            VideoUploadResponse videoUploadResponse = vkApiClient
+                    .upload().video(
+                            saveResponse.getUploadUrl().toString(),
+                            new File(filepath)
+                    ).execute();
+        } catch (ApiException | ClientException e) {
+            throw new RuntimeException(e);
+        }
+        return "video" + saveResponse.getOwnerId() + "_" + saveResponse.getVideoId();
+    }
+
+    public static String getDirectUrl(Doc doc) throws IOException {
+        String contentFromURL = GetByUrlUtil.getContentFromURL(doc.getUrl().toString());
+        List<String> firstFound = RegexUtils.getFirstFound(contentFromURL,
+                "\"(https:\\/\\/[^\"]*?\\.userapi\\.com[^\"]*?)\\?[^\"]*?dl=1\"");
+        if (firstFound == null || firstFound.size() != 1) {
+            logger.error("Doc: " + doc.toString());
+            logger.error("Content from url: " + contentFromURL);
+            throw new CantParseDocDownloadLinkException();
+        }
+        return firstFound.get(0);
     }
 
 }

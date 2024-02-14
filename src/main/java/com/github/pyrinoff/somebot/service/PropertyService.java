@@ -4,6 +4,7 @@ import com.github.pyrinoff.somebot.api.service.IDatabaseDataProvider;
 import com.github.pyrinoff.somebot.api.service.ITelegramDataProvider;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,10 @@ public class PropertyService implements ITelegramDataProvider, IDatabaseDataProv
     @NotNull
     @Value("#{environment['tg.botname']}")
     private String tgBotname;
+
+    @NotNull
+    @Value("#{environment['tg.admin.id']}")
+    private Long tgAdminId;
     //TG END
 
     //VK START
@@ -46,7 +51,7 @@ public class PropertyService implements ITelegramDataProvider, IDatabaseDataProv
     @NotNull
 
     @Value("#{environment['vk.adminid']}")
-    private String vkAdminId;
+    private Integer vkAdminId;
     @NotNull
 
     @Value("#{environment['vk.appid']}")
@@ -110,5 +115,23 @@ public class PropertyService implements ITelegramDataProvider, IDatabaseDataProv
     @Value("#{environment['database.cache.region.factory_class']}")
     private String cacheRegionFactoryClass;
     //DATABASE END
+
+    //QIWI
+    @Nullable
+    @Value("#{environment['qiwi.public_key']}")
+    private String qiwiPublicKey;
+
+    @Nullable
+    @Value("#{environment['qiwi.secret_key']}")
+    private String qiwiSecretKey;
+
+    @Nullable
+    @Value("#{environment['qiwi.mock_enabled']}")
+    private Boolean qiwiMockEnabled;
+
+    @NotNull
+    @Value("#{environment['qiwi.flood_interval_seconds']}")
+    private Integer qiwiFloodIntervalSeconds;
+    //QIWI END
 
 }

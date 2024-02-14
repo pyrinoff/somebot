@@ -12,9 +12,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.ParameterizedType;
 
+
+@Service
 public class AbstractUserService<U extends User> implements IUserService<U> {
 
     public static final Logger logger = LoggerFactory.getLogger(AbstractUserService.class);
@@ -54,10 +57,17 @@ public class AbstractUserService<U extends User> implements IUserService<U> {
     }
 
     @SneakyThrows
+    @Transactional
     public U saveUser(@Nullable U user) {
         if(user == null) throw new UserNullException();
         if(user.getChatId() == null) throw new IdNullException();
         return addOrUpdate(user);
+    }
+
+    @Transactional
+    public U changeUserBalance(U user, double amount) {
+        user.setBalance(user.getBalance() + amount);
+        return saveUser(user);
     }
 
 }
