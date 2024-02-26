@@ -55,7 +55,7 @@ public class PropertyService implements ITelegramDataProvider, IDatabaseDataProv
     @NotNull
 
     @Value("#{environment['vk.appid']}")
-    private String vkAppId;
+    private Integer vkAppId;
     //VK END
 
     //DATABASE START

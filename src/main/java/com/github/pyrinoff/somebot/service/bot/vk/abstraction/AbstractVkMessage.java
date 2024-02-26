@@ -1,6 +1,7 @@
 package com.github.pyrinoff.somebot.service.bot.vk.abstraction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.pyrinoff.somebot.abstraction.AbstractMessage;
 import com.github.pyrinoff.somebot.api.command.ICommandWithPayload;
 import com.github.pyrinoff.somebot.api.command.ICommandWithText;
@@ -42,7 +43,13 @@ public class AbstractVkMessage<U extends User> extends AbstractMessage<MessageOb
                 || getOriginalMessage().getMessage().getPayload() == null
                 || getOriginalMessage().getMessage().getPayload().isEmpty()
         ) return null; //throw new RuntimeException("Cant get payload from this vk message!");
-        return new ObjectMapper().readValue(getOriginalMessage().getMessage().getPayload(), String.class);
+        //System.out.println("Payload: " + getOriginalMessage().getMessage().getPayload());
+        try {
+            return new ObjectMapper().readValue(getOriginalMessage().getMessage().getPayload(), String.class);
+            //return new ObjectMapper().readValue(getOriginalMessage().getMessage().getPayload(), Object.class);
+        } catch (MismatchedInputException e) {
+            return getOriginalMessage().getMessage().getPayload();
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.github.pyrinoff.somebot.service.bot.tg;
 
 import com.github.pyrinoff.somebot.abstraction.AbstractBot;
+import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.tg.api.ITgMessageProcessingService;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,9 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.BanChatMember;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.RevokeChatInviteLink;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.UnbanChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -141,6 +145,22 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
         sendMessage(update.getMessage().getChatId(), text, keyboard, false, null);
     }
 
+    public void sendMessageBack(User user, String text) {
+        sendMessage(user.getChatId(), text, false);
+    }
+
+    public void sendMessageBack(User user, String text, boolean protect) {
+        sendMessage(user.getChatId(), text, protect);
+    }
+
+    public void sendMessageBack(User user, String text, ReplyKeyboard keyboard, boolean protect) {
+        sendMessage(user.getChatId(), text, keyboard, protect, null);
+    }
+
+    public void sendMessageBack(User user, String text, ReplyKeyboard keyboard) {
+        sendMessage(user.getChatId(), text, keyboard, false, null);
+    }
+
     public void sendPhotoBack(final Update update, final String filepath, final String caption, final boolean protect, final boolean fromClasspath) {
         final String chatId = String.valueOf(update.getMessage().getChatId());
         final SendPhoto sendPhoto = new SendPhoto();
@@ -208,6 +228,61 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
             e.printStackTrace();
         }
         logger.info("Initialized bot: tg, name: " + getBotUsername());
+    }
+
+    /**
+     * Use this method to ban a user in a group, a supergroup or a channel.
+     * In the case of supergroups and channels, the user will not be able to return to the chat on their own using
+     * invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work
+     * and must have the appropriate administrator rights.
+     * Returns True on success.
+     */
+    public void banChatMember(Long chatOrGroupId, Long userId, @Nullable Integer untilDate, @Nullable Boolean revokeMessages) {
+        BanChatMember.BanChatMemberBuilder banChatMemberBuilder = BanChatMember.builder()
+                .chatId(chatOrGroupId)
+                .userId(userId);
+        if (untilDate != null) banChatMemberBuilder.untilDate(untilDate);
+        if (revokeMessages != null) banChatMemberBuilder.revokeMessages(revokeMessages);
+        try {
+            execute(banChatMemberBuilder.build());
+        } catch (TelegramApiException e) {
+            logger.error("Cant banChatMember!");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Use this method to unban a previously banned user in a supergroup or channel.
+     * The user will not return to the group or channel automatically, but will be able to join via link, etc.
+     * The bot must be an administrator for this to work. By default, this method guarantees that after the call
+     * the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat
+     * they will also be removed from the chat. If you don't want this, use the parameter only_if_banned.
+     * Returns True on success.
+     */
+    public void unbanChatMember(Long chatOrGroupId, Long userId, @Nullable Boolean onlyIfBanned) {
+        UnbanChatMember.UnbanChatMemberBuilder unbanChatMemberBuilder = UnbanChatMember.builder()
+                .chatId(chatOrGroupId)
+                .userId(userId);
+        if (onlyIfBanned != null) unbanChatMemberBuilder.onlyIfBanned(onlyIfBanned);
+        try {
+            execute(unbanChatMemberBuilder.build());
+        } catch (TelegramApiException e) {
+            logger.error("Cant unbanChatMember!");
+            e.printStackTrace();
+        }
+    }
+
+    public void revokeChatLink(Long chatId, String link) {
+        try {
+            execute(RevokeChatInviteLink.builder()
+                    .chatId(chatId)
+                    .inviteLink(link)
+                    .build()
+            );
+        } catch (TelegramApiException e) {
+            logger.error("Cant revokeChatLink!");
+            e.printStackTrace();
+        }
     }
 
 }
