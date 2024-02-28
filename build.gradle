@@ -35,7 +35,7 @@ dependencies {
             'org.jetbrains:annotations:24.0.1',
             'org.springframework.boot:spring-boot-starter-data-jpa:3.1.0',
             'org.telegram:telegrambots:6.7.0',
-            'com.github.pyrinoff:vk-java-sdk:7fdcb839e4', //'com.vk.api:sdk:1.0.14'
+            'com.github.pyrinoff:vk-java-sdk:5952b573e2', //'com.vk.api:sdk:1.0.14'
             'com.github.pyrinoff:bill-payments-java-sdk:-SNAPSHOT', //orig https://github.com/QIWI-API/bill-payments-java-sdk
             'org.hsqldb:hsqldb:2.7.1',
 //            'org.slf4j:slf4j-api:2.0.9',

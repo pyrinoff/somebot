@@ -4,34 +4,35 @@ import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.events.longpoll.GroupLongPollApi;
 import com.vk.api.sdk.objects.callback.MessageObject;
+import com.vk.api.sdk.objects.callback.VkPayTransaction;
 import com.vk.api.sdk.objects.messages.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class VkBotHandler extends GroupLongPollApi {
 
-
-    private static final Logger logger = LoggerFactory.getLogger(VkBotHandler.class);
-
-//    IMessageProcessingService<VkMessage> processingService;
+    public static final Logger logger = LoggerFactory.getLogger(VkBotHandler.class);
 
     VkBot vkBot;
 
     public VkBotHandler(VkApiClient client, GroupActor actor, int waitTime, VkBot vkBot) {
         super(client, actor, waitTime);
-//        this.processingService = processingService;
         this.vkBot = vkBot;
     }
 
     @Override
     protected void messageNew(Integer groupId, MessageObject update) {
-        Message message = update.getMessage();
-        logger.debug(message.toPrettyString());
-        vkBot.onUpdateReceived(update);
+        logger.debug(update.getMessage().toPrettyString());
+        vkBot.onUpdateReceived(update); //forward to VkBot > ProcessingService
     }
 
+    @Override
+    protected void vkPayTransaction(Integer groupId, VkPayTransaction message) {
+        logger.debug(message.toString());
+        vkBot.processVkPayTransaction(message); //forward to VkBot > ProcessingService
+    }
 
-/*        MessageFromBot messageFromBot = null;
+    /*        MessageFromBot messageFromBot = null;
         try {
             messageFromBot = convertOriginalMessage(message);
         }

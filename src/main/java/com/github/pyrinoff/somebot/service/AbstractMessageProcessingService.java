@@ -80,7 +80,7 @@ public abstract class AbstractMessageProcessingService<Z, U extends User, M exte
 
     //TODO use it
     protected void onFloodMessage(M message) {
-
+        logger.info("Flood registered");
     }
 
     public void preprocessMessage(final M message) {

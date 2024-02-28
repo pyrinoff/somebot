@@ -14,6 +14,7 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.callback.MessageObject;
+import com.vk.api.sdk.objects.callback.VkPayTransaction;
 import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.messages.Keyboard;
 import com.vk.api.sdk.objects.messages.Message;
@@ -47,6 +48,8 @@ import java.util.*;
 public class VkBot implements AbstractBot {
 
     private static final Logger logger = LoggerFactory.getLogger(VkBot.class);
+
+    public static final String START_BUTTON_PAYLOAD = "{\"command\":\"start\"}";
 
     @Autowired
     PropertyService propertyService;
@@ -85,6 +88,10 @@ public class VkBot implements AbstractBot {
 
     public void onUpdateReceived(MessageObject update) {
         processingService.processUpdate(update);
+    }
+
+    public void processVkPayTransaction(VkPayTransaction update) {
+        processingService.processVkPayTransaction(update);
     }
 
     public void sendMessageBack(MessageObject message, String text) {
@@ -133,6 +140,7 @@ public class VkBot implements AbstractBot {
         //Text
         if (textToSend != null) messagesSendQuery.message(textToSend);
         if (keyboard != null) {
+            logger.debug ("Keyboard: " + keyboard);
             messagesSendQuery.keyboard(keyboard);
         }
         if (forwardMessages != null) messagesSendQuery.forwardMessages(forwardMessages);
@@ -215,7 +223,9 @@ public class VkBot implements AbstractBot {
         try {
             messagesSendQuery.execute();
         } catch (ApiException e) {
+            if(e.getCode() == 911) logger.error ("Keyboard: " + keyboard);
             logger.error("INVALID REQUEST", e);
+
         } catch (ClientException e) {
             logger.error("NETWORK ERROR", e);
         }

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.pyrinoff.somebot.abstraction.AbstractMessage;
 import com.github.pyrinoff.somebot.api.command.ICommandWithPayload;
 import com.github.pyrinoff.somebot.api.command.ICommandWithText;
+import com.github.pyrinoff.somebot.command.CommandPool;
 import com.github.pyrinoff.somebot.exception.model.NonFatalException;
 import com.github.pyrinoff.somebot.model.User;
+import com.github.pyrinoff.somebot.service.bot.vk.VkBotHandler;
 import com.vk.api.sdk.objects.callback.MessageObject;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -45,11 +47,11 @@ public class AbstractVkMessage<U extends User> extends AbstractMessage<MessageOb
         ) return null; //throw new RuntimeException("Cant get payload from this vk message!");
         //System.out.println("Payload: " + getOriginalMessage().getMessage().getPayload());
         try {
-            return new ObjectMapper().readValue(getOriginalMessage().getMessage().getPayload(), String.class);
-            //return new ObjectMapper().readValue(getOriginalMessage().getMessage().getPayload(), Object.class);
+            VkBotHandler.logger.info("Payload from object: `" + getOriginalMessage().getMessage().getPayload() + "'");
+            VkBotHandler.logger.info("Payload deserialized: `" + AbstractCommandVkMessage.readPayload(getOriginalMessage().getMessage().getPayload()) + "'");
+            return AbstractCommandVkMessage.readPayload(getOriginalMessage().getMessage().getPayload());
         } catch (MismatchedInputException e) {
             return getOriginalMessage().getMessage().getPayload();
         }
     }
-
 }

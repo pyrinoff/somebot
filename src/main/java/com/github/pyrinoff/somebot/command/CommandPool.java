@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class CommandPool<Z, U extends User, M extends AbstractMessage<Z, U>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(CommandPool.class);
+    public static final Logger logger = LoggerFactory.getLogger(CommandPool.class);
 
     private List<ICommand<Z, U, M>> commandList = Collections.emptyList();
 
