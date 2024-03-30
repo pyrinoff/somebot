@@ -1,24 +1,38 @@
 package com.github.pyrinoff.somebot.service.bot.vk.abstraction;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pyrinoff.somebot.abstraction.AbstractMessage;
 import com.github.pyrinoff.somebot.api.command.ICommandWithPayload;
 import com.github.pyrinoff.somebot.api.command.ICommandWithText;
-import com.github.pyrinoff.somebot.command.CommandPool;
 import com.github.pyrinoff.somebot.exception.model.NonFatalException;
 import com.github.pyrinoff.somebot.model.User;
-import com.github.pyrinoff.somebot.service.bot.vk.VkBotHandler;
+import com.github.pyrinoff.somebot.service.bot.vk.concrete.VkPayload;
 import com.vk.api.sdk.objects.callback.MessageObject;
+import com.vk.api.sdk.objects.messages.Message;
 import lombok.Getter;
-import lombok.SneakyThrows;
 
 @Getter
 public class AbstractVkMessage<U extends User> extends AbstractMessage<MessageObject, U> implements
         ICommandWithText, ICommandWithPayload {
 
+    private VkPayload payloadVk;
+    private String payload;
+
+    @Override
+    public String getPayload() {
+        return payload;
+    }
+
+    @Override
+    public VkPayload getPayloadVk() {
+        return payloadVk;
+    }
+
     public AbstractVkMessage(MessageObject originalMessage) {
         super(originalMessage);
+        //сразу парсим в переменные, т.к. будет использоваться часто в проверках, каждый раз парсить нет смысла
+        payloadVk = getPayloadVk(originalMessage.getMessage());
+        payload = getStringPayload(originalMessage.getMessage());
     }
 
     public String getText() {
@@ -34,24 +48,32 @@ public class AbstractVkMessage<U extends User> extends AbstractMessage<MessageOb
     }
 
     public Integer getMessageTimestamp() {
-        if (getOriginalMessage().getMessage() == null) return null;
+        if (getOriginalMessage() == null) return null;
         return getOriginalMessage().getMessage().getDate();
     }
 
-    @SneakyThrows
-    @Override
-    public String getPayload() {
-        if (getOriginalMessage().getMessage() == null
-                || getOriginalMessage().getMessage().getPayload() == null
-                || getOriginalMessage().getMessage().getPayload().isEmpty()
-        ) return null; //throw new RuntimeException("Cant get payload from this vk message!");
-        //System.out.println("Payload: " + getOriginalMessage().getMessage().getPayload());
+    private static String getStringPayload(Message message) {
+        if (message == null || message.getPayload() == null || message.getPayload().isEmpty())
+            return null; //throw new RuntimeException("Cant get payload from this vk message!");
         try {
-            VkBotHandler.logger.info("Payload from object: `" + getOriginalMessage().getMessage().getPayload() + "'");
-            VkBotHandler.logger.info("Payload deserialized: `" + AbstractCommandVkMessage.readPayload(getOriginalMessage().getMessage().getPayload()) + "'");
-            return AbstractCommandVkMessage.readPayload(getOriginalMessage().getMessage().getPayload());
-        } catch (MismatchedInputException e) {
-            return getOriginalMessage().getMessage().getPayload();
+            return AbstractCommandVkMessage.readPayload(message.getPayload());
+        } catch (JsonProcessingException e) {
+            //VkBotHandler.logger.error("Cant deserialize payload as string: " + message.getPayload());
+            //e.printStackTrace();
+            return null;
         }
     }
+
+    private static VkPayload getPayloadVk(Message message) {
+        if (message == null || message.getPayload() == null || message.getPayload().isEmpty()
+        ) return null; //throw new RuntimeException("Cant get payload from this vk message!");
+        try {
+            return VkPayload.fromPayload(message.getPayload());
+        } catch (JsonProcessingException e) {
+            //VkBotHandler.logger.error("Cant deserialize payload as VkPayload: " + message.getPayload());
+            //e.printStackTrace();
+            return null;
+        }
+    }
+
 }

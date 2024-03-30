@@ -2,11 +2,13 @@ package com.github.pyrinoff.somebot.service.bot.vk.abstraction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.pyrinoff.somebot.abstraction.AbstractCommand;
 import com.github.pyrinoff.somebot.api.command.ICommandWithPayload;
 import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.vk.VkBot;
+import com.github.pyrinoff.somebot.service.bot.vk.concrete.VkPayload;
 import com.vk.api.sdk.objects.callback.MessageObject;
 import com.vk.api.sdk.objects.messages.Keyboard;
 import com.vk.api.sdk.objects.messages.KeyboardButton;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractCommandVkMessage<U extends User, M extends AbstractVkMessage<U>> extends AbstractCommand<MessageObject, U, M> {
@@ -62,12 +65,11 @@ public abstract class AbstractCommandVkMessage<U extends User, M extends Abstrac
 
     @SneakyThrows
     public static String makePayload(String payload) {
-        return new ObjectMapper().writeValueAsString(payload); //не нужно, похоже внутри либы есть JSON-конвертация пейлоада
-        //return payload;
+        return new ObjectMapper().writeValueAsString(payload);
     }
 
     public static String readPayload(String payload) throws JsonProcessingException {
-        return new ObjectMapper().readValue(payload, String.class);
+        return new ObjectMapper().readValue(payload, String.class).replaceAll("\"", "");
     }
 
     @SneakyThrows
@@ -80,25 +82,26 @@ public abstract class AbstractCommandVkMessage<U extends User, M extends Abstrac
     }
 
     protected static KeyboardButton createButton(String text, String payload) {
-        String payloadJson = makePayload(payload);
-        if (payloadJson.length() >= 1000)
+        return createButtonWithEncodedPayload(text, makePayload(payload));
+    }
+
+    protected static KeyboardButton createButton(String text, VkPayload payload) {
+        try {
+            return createButtonWithEncodedPayload(text,  payload.toJSON());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static KeyboardButton createButtonWithEncodedPayload(String text, String completePayload) {
+        if (completePayload.length() >= 1000)
             throw new IllegalArgumentException("Payload can't be longer than 1000 symbols!");
         return new KeyboardButton().
                 setAction(new KeyboardButtonAction()
                         .setLabel(text)
-                        .setPayload(payloadJson) //JSON, max 1000 symbols
+                        .setPayload(completePayload)
                         .setType(TemplateActionTypeNames.TEXT)
                 );
-    }
-
-    @lombok.SneakyThrows
-    public static void main(String[] args) {
-        String s = makePayload(10);
-        String s2 = makePayload(1, 2, 3);
-        String s3 = makePayload("some");
-        System.out.println(readPayload(s));
-        System.out.println(readPayload(s2));
-        System.out.println(readPayload(s3));
     }
 
     @SneakyThrows

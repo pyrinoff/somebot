@@ -1,5 +1,6 @@
 package com.github.pyrinoff.somebot.api.command;
 
+import com.github.pyrinoff.somebot.service.bot.vk.concrete.VkPayload;
 import com.github.pyrinoff.somebot.util.StringUtil;
 
 public interface ICommandWithPayload {
@@ -7,6 +8,8 @@ public interface ICommandWithPayload {
     String DEFAULT_DELIMITER = " ";
 
     String getPayload();
+
+    VkPayload getPayloadVk();
 
     default Integer getPayloadInt() {
         if(getPayload() == null) return null;
