@@ -1,6 +1,6 @@
 tg.enabled=true
 tg.token=111222333:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-tg.botname=Somebot
+tg.username=Somebot
 tg.admin.id=123456789
 
 vk.enabled=true

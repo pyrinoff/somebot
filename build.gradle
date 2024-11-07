@@ -23,6 +23,7 @@ jar {
 }
 
 repositories {
+    mavenLocal() //шоб таскать utils из локального репа
     mavenCentral()
     maven { url 'https://jitpack.io' }
 }
@@ -36,10 +37,11 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-data-jpa:3.1.0',
             'org.telegram:telegrambots:6.7.0',
             'com.github.pyrinoff:vk-java-sdk:5952b573e2', //'com.vk.api:sdk:1.0.14'
-            'com.github.pyrinoff:bill-payments-java-sdk:-SNAPSHOT', //orig https://github.com/QIWI-API/bill-payments-java-sdk
+//            'com.github.pyrinoff:bill-payments-java-sdk:-SNAPSHOT', //orig https://github.com/QIWI-API/bill-payments-java-sdk
             'org.hsqldb:hsqldb:2.7.1',
 //            'org.slf4j:slf4j-api:2.0.9',
 //            'ch.qos.logback:logback-classic:1.4.7',
+            'com.github.pyrinoff:utils:master-SNAPSHOT' //com.github.pyrinoff:utils:master-SNAPSHOT
     )
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.9.2'

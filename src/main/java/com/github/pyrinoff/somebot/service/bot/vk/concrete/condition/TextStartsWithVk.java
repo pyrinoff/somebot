@@ -4,12 +4,12 @@ import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.bot.vk.abstraction.AbstractVkMessage;
 import com.github.pyrinoff.somebot.service.bot.vk.api.AbstractVkCondition;
 
-public class TextStartWithVk<U extends User, M extends AbstractVkMessage<U>>
+public class TextStartsWithVk<U extends User, M extends AbstractVkMessage<U>>
         implements AbstractVkCondition<U, M> {
 
     final String theText;
 
-    public TextStartWithVk(final String text) {
+    public TextStartsWithVk(final String text) {
         this.theText = text;
     }
 

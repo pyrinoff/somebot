@@ -5,7 +5,7 @@ import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.bot.vk.VkBotHandler;
 import com.github.pyrinoff.somebot.service.bot.vk.abstraction.AbstractVkMessage;
 import com.github.pyrinoff.somebot.service.bot.vk.api.AbstractVkCondition;
-import com.github.pyrinoff.somebot.util.StringUtil;
+import  com.github.pyrinoff.utils.StringUtil;
 
 import java.util.Arrays;
 import java.util.List;

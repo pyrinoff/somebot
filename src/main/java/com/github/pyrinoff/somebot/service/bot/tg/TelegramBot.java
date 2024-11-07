@@ -4,6 +4,7 @@ import com.github.pyrinoff.somebot.abstraction.AbstractBot;
 import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.tg.api.ITgMessageProcessingService;
+import com.github.pyrinoff.somebot.service.bot.tg.custom.NonDefaultBotSession;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,18 +15,17 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.BanChatMember;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RevokeChatInviteLink;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.UnbanChatMember;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
 
     @Override
     public String getBotUsername() {
-        return propertyService.getTgBotname();
+        return propertyService.getTgUsername();
     }
 
     @Override
@@ -61,11 +61,11 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
     }
 
     public void sendMessage(Long chatId, String textToSend, boolean protect) {
-        sendMessage(chatId, textToSend, protect, null);
+        sendMessage(chatId, textToSend, null, protect, null);
     }
 
     public void sendMessage(Long chatId, String textToSend) {
-        sendMessage(chatId, textToSend, false);
+        sendMessage(chatId, textToSend, null, false, null);
     }
 
     public void sendMessage(Long chatId, String textToSend, @Nullable ReplyKeyboard keyboard) {
@@ -161,22 +161,54 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
         sendMessage(user.getChatId(), text, keyboard, false, null);
     }
 
+    public void sendMessageBackReply(Update update, String text) {
+        sendMessage(update.getMessage().getChatId(), text, false, update.getMessage().getMessageId());
+    }
+
+    public void sendMessageBackReply(Update update, String text, boolean protect) {
+        sendMessage(update.getMessage().getChatId(), text, protect, update.getMessage().getMessageId());
+    }
+
+    public void sendMessageBackReply(Update update, String text, ReplyKeyboard keyboard, boolean protect) {
+        sendMessage(update.getMessage().getChatId(), text, keyboard, protect, update.getMessage().getMessageId());
+    }
+
+    public void sendMessageBackReply(Update update, String text, ReplyKeyboard keyboard) {
+        sendMessage(update.getMessage().getChatId(), text, keyboard, false, update.getMessage().getMessageId());
+    }
+
     public void sendPhotoBack(final Update update, final String filepath, final String caption, final boolean protect, final boolean fromClasspath) {
-        final String chatId = String.valueOf(update.getMessage().getChatId());
+        sendPhoto(update.getMessage().getChatId(), null, protect, false, null, filepath, fromClasspath);
+    }
+
+
+    public void sendPhoto(
+            Long chatId
+            , @Nullable Integer replyToMessageId
+            , boolean protect
+            , boolean spoiler
+            , @Nullable String caption
+            , final String filepath
+            , final boolean fromClasspath) {
+
         final SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(chatId);
-        if (caption != null) sendPhoto.setCaption(caption);
         try (final InputStream inputStream = fromClasspath ? TelegramBot.class.getClassLoader().getResourceAsStream(filepath) : new FileInputStream(filepath)) {
+            sendPhoto.setChatId(chatId);
             sendPhoto.setPhoto(new InputFile().setMedia(inputStream, filepath));
             sendPhoto.setProtectContent(protect);
+            sendPhoto.setHasSpoiler(spoiler);
+            if(replyToMessageId != null) sendPhoto.setReplyToMessageId(replyToMessageId);
+            if (caption != null) sendPhoto.setCaption(caption);
             try {
                 execute(sendPhoto);
             } catch (TelegramApiException e) {
                 logger.error("Cant sendPhoto!");
+                logger.error(String.valueOf(e.getStackTrace()));
                 e.printStackTrace();
             }
         } catch (IOException e) {
-            logger.error("IO error during sendPhotoBack");
+            logger.error("IO error during sendPhoto");
+            logger.error(String.valueOf(e.getStackTrace()));
             e.printStackTrace();
         }
     }
@@ -199,6 +231,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
                 inputMedias.add(inputMediaPhoto);
             } catch (IOException e) {
                 logger.error("Cant setMedia, IOException!");
+                logger.error(String.valueOf(e.getStackTrace()));
                 e.printStackTrace();
                 return;
             }
@@ -211,9 +244,74 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
             execute(sendMediaGroup);
         } catch (TelegramApiException e) {
             logger.error("Cant SendMediaGroup (photos)!");
+            logger.error(String.valueOf(e.getStackTrace()));
             e.printStackTrace();
         }
     }
+
+
+    public void sendVideo(
+            Long chatId
+            , @Nullable Integer replyToMessageId
+            , boolean protect
+            , boolean spoiler
+            , @Nullable String caption
+            , final String filepath
+            , final boolean fromClasspath
+    ) {
+        final SendVideo sendVideo = new SendVideo();
+        try (final InputStream inputStream = fromClasspath ? TelegramBot.class.getClassLoader().getResourceAsStream(filepath) : new FileInputStream(filepath)) {
+            sendVideo.setChatId(chatId);
+            sendVideo.setVideo(new InputFile().setMedia(inputStream, filepath));
+            sendVideo.setProtectContent(protect);
+            sendVideo.setHasSpoiler(spoiler);
+            if (replyToMessageId != null) sendVideo.setReplyToMessageId(replyToMessageId);
+            if (caption != null) sendVideo.setCaption(caption);
+            try {
+                execute(sendVideo);
+            } catch (TelegramApiException e) {
+                logger.error("Cant sendVideo!");
+                logger.error(String.valueOf(e.getStackTrace()));
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            logger.error("IO error during sendVideo");
+            logger.error(String.valueOf(e.getStackTrace()));
+            e.printStackTrace();
+        }
+    }
+
+    public void sendAnimation(
+            Long chatId
+            , @Nullable Integer replyToMessageId
+            , boolean protect
+            , boolean spoiler
+            , @Nullable String caption
+            , final String filepath
+            , final boolean fromClasspath
+    ) {
+        final SendAnimation sendAnimation = new SendAnimation();
+        try (final InputStream inputStream = fromClasspath ? TelegramBot.class.getClassLoader().getResourceAsStream(filepath) : new FileInputStream(filepath)) {
+            sendAnimation.setChatId(chatId);
+            sendAnimation.setAnimation(new InputFile().setMedia(inputStream, filepath));
+            sendAnimation.setProtectContent(protect);
+            sendAnimation.setHasSpoiler(spoiler);
+            if (replyToMessageId != null) sendAnimation.setReplyToMessageId(replyToMessageId);
+            if (caption != null) sendAnimation.setCaption(caption);
+            try {
+                execute(sendAnimation);
+            } catch (TelegramApiException e) {
+                logger.error("Cant sendAnimation!");
+                logger.error(String.valueOf(e.getStackTrace()));
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            logger.error("IO error during sendAnimation");
+            logger.error(String.valueOf(e.getStackTrace()));
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void initialize() {
@@ -222,7 +320,8 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
             return;
         }
         try {
-            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            NonDefaultBotSession.RESET_MESSAGES_ON_START = propertyService.getTgSkipUpdates();
+            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(NonDefaultBotSession.class);
             telegramBotsApi.registerBot(this);
         } catch (TelegramApiException e) {
             e.printStackTrace();
@@ -283,6 +382,20 @@ public class TelegramBot extends TelegramLongPollingBot implements AbstractBot {
             logger.error("Cant revokeChatLink!");
             e.printStackTrace();
         }
+    }
+
+    public ChatMember getChatMember(Long chatId, Long userId) {
+        try {
+            return execute(GetChatMember.builder()
+                    .chatId(chatId)
+                    .userId(userId)
+                    .build()
+            );
+        } catch (TelegramApiException e) {
+            logger.error("Cant getChatMember!");
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

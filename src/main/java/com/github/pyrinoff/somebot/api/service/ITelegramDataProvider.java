@@ -6,6 +6,6 @@ public interface ITelegramDataProvider {
 
     @NotNull String getTgToken();
 
-    @NotNull String getTgBotname();
+    @NotNull String getTgUsername();
 
 }
