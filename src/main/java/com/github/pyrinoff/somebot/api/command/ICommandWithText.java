@@ -1,6 +1,6 @@
 package com.github.pyrinoff.somebot.api.command;
 
-import com.github.pyrinoff.somebot.util.StringUtil;
+import  com.github.pyrinoff.utils.StringUtil;
 
 public interface ICommandWithText {
 

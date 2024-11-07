@@ -5,8 +5,8 @@ import com.github.pyrinoff.somebot.exception.service.CantParseDocDownloadLinkExc
 import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.PropertyService;
 import com.github.pyrinoff.somebot.service.bot.vk.api.IVkMessageProcessingService;
-import com.github.pyrinoff.somebot.util.GetByUrlUtil;
-import com.github.pyrinoff.somebot.util.RegexUtils;
+import com.github.pyrinoff.utils.GetByUrlUtil;
+import com.github.pyrinoff.utils.RegexUtil;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -140,7 +140,7 @@ public class VkBot implements AbstractBot {
         //Text
         if (textToSend != null) messagesSendQuery.message(textToSend);
         if (keyboard != null) {
-            logger.debug ("Keyboard: " + keyboard);
+            logger.debug("Keyboard: " + keyboard);
             messagesSendQuery.keyboard(keyboard);
         }
         if (forwardMessages != null) messagesSendQuery.forwardMessages(forwardMessages);
@@ -223,7 +223,7 @@ public class VkBot implements AbstractBot {
         try {
             messagesSendQuery.execute();
         } catch (ApiException e) {
-            if(e.getCode() == 911) logger.error ("Keyboard: " + keyboard);
+            if (e.getCode() == 911) logger.error("Keyboard: " + keyboard);
             logger.error("INVALID REQUEST", e);
 
         } catch (ClientException e) {
@@ -411,23 +411,26 @@ public class VkBot implements AbstractBot {
                 GetWallUploadServerResponse wallUploadServerResponse = wallUploadServerQuery.execute();
                 photoUploadServer = wallUploadServerResponse.getUploadUrl();
             }
-            UploadPhotoQuery uploadPhotoQuery = vkApiClient.upload().photo(photoUploadServer.toString(),
-                    new File(((oneFilepath)))
-            );
-            PhotoUploadResponse photoUploadResponse = uploadPhotoQuery.execute();
-            logger.debug("addAttachmentsToWall: photo uploaded, will saveMessagesPhoto");
+            synchronized (this) {
+                UploadPhotoQuery uploadPhotoQuery = vkApiClient.upload()
+                        .photo(photoUploadServer.toString(), new File(((oneFilepath))));
+                PhotoUploadResponse photoUploadResponse = uploadPhotoQuery.execute();
+                logger.debug("addAttachmentsToWall: photo uploaded, will saveMessagesPhoto");
 
-            PhotosSaveWallPhotoQuery photosSaveWallPhotoQuery = vkApiClient.photos().saveWallPhoto(userActor
-                    , photoUploadResponse.getPhoto()).hash(photoUploadResponse.getHash()).server(photoUploadResponse.getServer());
-            if (isGroup) photosSaveWallPhotoQuery.groupId(wallId);
-            else photosSaveWallPhotoQuery.userId(wallId);
+                PhotosSaveWallPhotoQuery photosSaveWallPhotoQuery = vkApiClient.photos()
+                        .saveWallPhoto(userActor, photoUploadResponse.getPhoto())
+                        .hash(photoUploadResponse.getHash())
+                        .server(photoUploadResponse.getServer());
+                logger.info("Photo object: " + photoUploadResponse.toPrettyString());
+                if (isGroup) photosSaveWallPhotoQuery.groupId(wallId);
+                else photosSaveWallPhotoQuery.userId(wallId);
+                List<SaveWallPhotoResponse> saveWallPhotoResponses = photosSaveWallPhotoQuery.execute();
 
-            List<SaveWallPhotoResponse> saveWallPhotoResponses = photosSaveWallPhotoQuery.execute();
-
-            for (SaveWallPhotoResponse oneSaved : saveWallPhotoResponses) {
-                String attachmentString = "photo" + oneSaved.getOwnerId() + "_" + oneSaved.getId();
-                attachmentsStrings.add(attachmentString);
-                logger.debug("addAttachmentsToWall: photo saveWallPhoto: " + attachmentString);
+                for (SaveWallPhotoResponse oneSaved : saveWallPhotoResponses) {
+                    String attachmentString = "photo" + oneSaved.getOwnerId() + "_" + oneSaved.getId();
+                    attachmentsStrings.add(attachmentString);
+                    logger.debug("addAttachmentsToWall: photo saveWallPhoto: " + attachmentString);
+                }
             }
         }
         if (attachmentsStrings.size() < 1) return null;
@@ -494,7 +497,7 @@ public class VkBot implements AbstractBot {
 
     public static String getDirectUrl(Doc doc) throws IOException {
         String contentFromURL = GetByUrlUtil.getContentFromURL(doc.getUrl().toString());
-        List<String> firstFound = RegexUtils.getFirstFound(contentFromURL,
+        List<String> firstFound = RegexUtil.getFirstFound(contentFromURL,
                 "\"(https:\\/\\/[^\"]*?\\.userapi\\.com[^\"]*?)\\?[^\"]*?dl=1\"");
         if (firstFound == null || firstFound.size() != 1) {
             logger.error("Doc: " + doc.toString());

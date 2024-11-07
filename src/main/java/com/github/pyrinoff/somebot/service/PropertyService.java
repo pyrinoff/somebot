@@ -24,12 +24,15 @@ public class PropertyService implements ITelegramDataProvider, IDatabaseDataProv
     private String tgToken;
 
     @NotNull
-    @Value("#{environment['tg.botname']}")
-    private String tgBotname;
+    @Value("#{environment['tg.username']}")
+    private String tgUsername;
 
     @NotNull
     @Value("#{environment['tg.admin.id']}")
     private Long tgAdminId;
+
+    @Value("#{environment['tg.skip_updates']}")
+    private Boolean tgSkipUpdates;
     //TG END
 
     //VK START

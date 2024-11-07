@@ -3,20 +3,25 @@ package com.github.pyrinoff.somebot.service.bot.tg.concrete.condition;
 import com.github.pyrinoff.somebot.model.User;
 import com.github.pyrinoff.somebot.service.bot.tg.abstraction.AbstractTgMessage;
 import com.github.pyrinoff.somebot.service.bot.tg.api.AbstractTgCondition;
+import com.github.pyrinoff.utils.StringUtil;
 
-public class TextContainsInsensitiveTg<U extends User, M extends AbstractTgMessage<U>> implements AbstractTgCondition<U, M> {
+import java.util.List;
 
-    final String theText;
+public class TextContainsTextTg<U extends User, M extends AbstractTgMessage<U>> implements AbstractTgCondition<U, M> {
 
-    public TextContainsInsensitiveTg(final String text) {
-        this.theText = text;
+    final String[] thePhrases;
+
+    public TextContainsTextTg(final String... phrases) {
+        this.thePhrases = phrases;
     }
 
     @Override
     public boolean isFired(final M message) {
         return message.getOriginalMessage().hasMessage()
                 && message.getOriginalMessage().getMessage().hasText()
-                && message.getOriginalMessage().getMessage().getText().toLowerCase().contains(theText.toLowerCase());
+                && StringUtil.containsAnyOfPhrases( 
+                message.getOriginalMessage().getMessage().getText(),
+                thePhrases);
     }
 
 }
