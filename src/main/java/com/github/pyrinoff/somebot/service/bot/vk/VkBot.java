@@ -50,6 +50,7 @@ public class VkBot implements AbstractBot {
     private static final Logger logger = LoggerFactory.getLogger(VkBot.class);
 
     public static final String START_BUTTON_PAYLOAD = "{\"command\":\"start\"}";
+    public static final String VK_DOMAIN = "https://vk.ru";
 
     @Autowired
     PropertyService propertyService;
@@ -369,7 +370,7 @@ public class VkBot implements AbstractBot {
         randomUtil = new Random();
 
         try {
-            logger.error("Initialized bot: vk, link: https://vk.com/im?sel=-" + getGroupId());
+            logger.error("Initialized bot: vk, link: " + VK_DOMAIN + "/im?sel=-" + getGroupId());
             handler.run();
         } catch (Exception e) {
             e.printStackTrace();
@@ -453,11 +454,11 @@ public class VkBot implements AbstractBot {
     }
 
     public static String getPmInGroupUrl(Integer groupId, Integer userId) {
-        return "https://vk.com/gim" + groupId + "?sel=" + userId;
+        return VK_DOMAIN + "/gim" + groupId + "?sel=" + userId;
     }
 
     public static String getIdString(Integer userId) {
-        return "https://vk.com/id" + userId;
+        return VK_DOMAIN + "/id" + userId;
     }
 
     private VkApiClient getNewVkApiClient() {
@@ -496,15 +497,13 @@ public class VkBot implements AbstractBot {
     }
 
     public static String getDirectUrl(Doc doc) throws IOException {
-        String contentFromURL = GetByUrlUtil.getContentFromURL(doc.getUrl().toString());
-        List<String> firstFound = RegexUtil.getFirstFound(contentFromURL,
-                "\"(https:\\/\\/[^\"]*?\\.userapi\\.com[^\"]*?)\\?[^\"]*?dl=1\"");
-        if (firstFound == null || firstFound.size() != 1) {
-            logger.error("Doc: " + doc.toString());
-            logger.error("Content from url: " + contentFromURL);
-            throw new CantParseDocDownloadLinkException();
-        }
-        return firstFound.get(0);
+        String contentOfVkPageWithLink = GetByUrlUtil.getContentFromURL(doc.getUrl().toString());
+        List<String> firstFound = RegexUtil.getFirstFound(contentOfVkPageWithLink, "\"(https:\\/\\/[^\"]*?\\.userapi\\.com[^\"]*?)\\?[^\"]*?dl=1\"");
+        if (firstFound != null && firstFound.size() == 1) return (String) firstFound.get(0);
+
+        logger.error("CAbt get direct url for doc: " + doc);
+        logger.error("Content from url: " + contentOfVkPageWithLink.substring(0, 2048)); //if binary - less info
+        throw new CantParseDocDownloadLinkException();
     }
 
 }
